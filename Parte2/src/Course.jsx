@@ -5,8 +5,10 @@ import Total from './Total';
 
 const Course = ({ course }) => {
   // Calculamos la suma de los ejercicios
-  const totalExercises = course.parts.reduce((sum, part) => sum + part.exercises, 0);
-
+  const totalExercises = course.parts.reduce((sum, part) => 
+    sum + part.exercises, 0);
+  console.log('totalExercises:', totalExercises);
+  
   return (
     <div>
       <Header courseName={course.name} />
