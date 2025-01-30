@@ -3,6 +3,7 @@ import Filter from "./Filter";
 import PersonForm from "./PersonForm";
 import PersonList from "./PersonList";
 import axios from "axios";
+import comunicacion from "./comunicacion";
 
 
 const App = () => {
@@ -14,14 +15,9 @@ const App = () => {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/persons")
-      .then((response) => {
-        setPersons(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching data: ", error);
-      });
+    comunicacion.getAll()
+      .then(initialPersons => setPersons(initialPersons))
+      .catch(error => console.error("Error fetching data:", error));
   }, []);
 
   const handleNameChange = (event) => setNewName(event.target.value);
@@ -37,12 +33,14 @@ const App = () => {
     }
 
     const newPerson = { name: newName, number: newNumber, id: persons.length + 1 };
-    //Con el post envia al servidor la nueva persona y la agrega al array de personas 
-    axios.post("http://localhost:3001/persons", newPerson).then((response) => {
-      setPersons([...persons, response.data]);
-      setNewName("");
-      setNewNumber("");
-    });
+
+    comunicacion.create(newPerson)  
+      .then(returnedPerson => {
+        setPersons([...persons, returnedPerson]);
+        setNewName("");
+        setNewNumber("");
+      });
+     
   };
 
   const personsToShow = persons.filter((person) =>
