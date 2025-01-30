@@ -37,6 +37,7 @@ const App = () => {
     }
 
     const newPerson = { name: newName, number: newNumber, id: persons.length + 1 };
+    //Con el post envia al servidor la nueva persona y la agrega al array de personas 
     axios.post("http://localhost:3001/persons", newPerson).then((response) => {
       setPersons([...persons, response.data]);
       setNewName("");
