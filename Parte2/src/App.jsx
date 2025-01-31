@@ -26,21 +26,45 @@ const App = () => {
   
   const addPerson = (event) => {
     event.preventDefault();
-
-    if (persons.some((person) => person.name.toLowerCase() === newName.toLowerCase())) {
-      alert(`${newName} is already added to phonebook`);
-      return;
+ 
+    const existingPerson = persons.find(person => person.name.toLowerCase() === newName.toLowerCase());
+  
+    if (existingPerson) {
+      const confirmUpdate = window.confirm(
+        `${newName} ya está en la agenda, ¿quieres actualizar su número?`
+      );
+  
+      if (confirmUpdate) {
+        const updatedPerson = { ...existingPerson, number: newNumber };
+  
+        comunicacion.update(existingPerson.id, updatedPerson)
+          .then(returnedPerson => {
+            setPersons(persons.map(person => 
+              person.id !== existingPerson.id ? person : returnedPerson
+            ));
+            setNewName("");
+            setNewNumber("");
+          })
+          .catch(error => {
+            console.error("Error al actualizar el número:", error);
+            alert(`No se pudo actualizar el número de ${newName}`);
+          });
+  
+        return;
+      } else {
+        return;  
+      }
     }
-
-    const newPerson = { name: newName, number: newNumber, id: persons.length + 1 };
-
-    comunicacion.create(newPerson)  
+  
+    const newPerson = { name: newName, number: newNumber };
+  
+    comunicacion.create(newPerson)
       .then(returnedPerson => {
         setPersons([...persons, returnedPerson]);
         setNewName("");
         setNewNumber("");
-      });
-     
+      })
+      .catch(error => console.error("Error al agregar persona:", error));
   };
 
   const handleDelete = (id, name) => {
