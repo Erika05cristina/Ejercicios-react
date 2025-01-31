@@ -7,7 +7,17 @@ const create = (newPerson) => {
 };
 
 const getAll = () => {
-    return axios.get(baseUrl).then(response => response.data);
-  };
+  return axios.get(baseUrl).then((response) => response.data);
+};
 
-export default { create, getAll };
+const removePerson = (id) => {
+  return axios
+    .delete(`${baseUrl}/${id}`)
+    .then((response) => response.data)
+    .catch((error) => {
+      console.error("Error al eliminar persona:", error);
+      throw error;
+    });
+};
+
+export default { create, getAll, removePerson };

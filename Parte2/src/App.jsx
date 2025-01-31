@@ -23,7 +23,7 @@ const App = () => {
   const handleNameChange = (event) => setNewName(event.target.value);
   const handleNumberChange = (event) => setNewNumber(event.target.value);
   const handleSearchChange = (event) => setSearch(event.target.value);
-
+  
   const addPerson = (event) => {
     event.preventDefault();
 
@@ -41,6 +41,16 @@ const App = () => {
         setNewNumber("");
       });
      
+  };
+
+  const handleDelete = (id, name) => {
+    if (window.confirm(`¿Estás seguro de que quieres eliminar a ${name}?`)) {
+      comunicacion.removePerson(id)
+        .then(() => {
+          setPersons(persons.filter(person => person.id !== id));
+        })
+        .catch(error => console.error("Error al eliminar persona:", error));
+    }
   };
 
   const personsToShow = persons.filter((person) =>
@@ -65,7 +75,7 @@ const App = () => {
 
       <h3>Numbers</h3>
 
-      <PersonList persons={personsToShow} />
+      <PersonList persons={personsToShow} handleDelete={handleDelete} />
     </div>
   );
 };
