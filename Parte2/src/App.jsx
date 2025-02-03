@@ -1,134 +1,57 @@
-import { useState, useEffect } from "react";
-import Filter from "./Filter";
-import PersonForm from "./PersonForm";
-import PersonList from "./PersonList";
-import comunicacion from "./comunicacion";
-import "./index.css";
-import Notification from "./Notification";
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const Country = ({ country }) => (
+  <div>
+    <h2>{country.name.common}</h2>
+    <p>Capital: {country.capital}</p>
+    <p>Área: {country.area} km²</p>
+    <h3>Idiomas:</h3>
+    <ul>
+      {Object.values(country.languages).map(lang => (
+        <li key={lang}>{lang}</li>
+      ))}
+    </ul>
+    <img src={country.flags.png} alt={`Bandera de ${country.name.common}`} width="150" />
+  </div>
+);
+
+const CountriesList = ({ countries, setFilter }) => (
+  <div>
+    {countries.map(country => (
+      <p key={country.name.common}>
+        {country.name.common} <button onClick={() => setFilter(country.name.common)}>Mostrar</button>
+      </p>
+    ))}
+  </div>
+);
 
 const App = () => {
-  const [persons, setPersons] = useState([]);
-  const [newName, setNewName] = useState("");
-  const [newNumber, setNewNumber] = useState("");
-  const [search, setSearch] = useState("");
-  const [notification, setNotification] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [filter, setFilter] = useState('');
+  const [countries, setCountries] = useState([]);
 
   useEffect(() => {
-    comunicacion
-      .getAll()
-      .then((initialPersons) => setPersons(initialPersons))
-      .catch((error) => console.error("Error al obtener datos:", error));
+    axios.get('https://studies.cs.helsinki.fi/restcountries/api/all')
+      .then(response => setCountries(response.data));
   }, []);
 
-  const handleNameChange = (event) => setNewName(event.target.value);
-  const handleNumberChange = (event) => setNewNumber(event.target.value);
-  const handleSearchChange = (event) => setSearch(event.target.value);
-
-  const addPerson = (event) => {
-    event.preventDefault();
-
-    const existingPerson = persons.find(
-      (person) => person.name.toLowerCase() === newName.toLowerCase()
-    );
-
-    if (existingPerson) {
-      const confirmUpdate = window.confirm(
-        `${newName} ya está en la agenda, ¿quieres actualizar su número?`
-      );
-
-      if (confirmUpdate) {
-        const updatedPerson = { ...existingPerson, number: newNumber };
-
-        comunicacion
-          .update(existingPerson.id, updatedPerson)
-          .then((returnedPerson) => {
-            setPersons(
-              persons.map((person) =>
-                person.id !== existingPerson.id ? person : returnedPerson
-              )
-            );
-            setNewName("");
-            setNewNumber("");
-          })
-          .catch((error) => {
-            console.error("Error al actualizar:", error);
-
-            if (error.response && error.response.status === 404) {
-              setErrorMessage(`La persona '${newName}' ya fue eliminada del servidor`);
-              setPersons(persons.filter((person) => person.id !== existingPerson.id));
-            } else {
-              setErrorMessage(`Error al actualizar a ${newName}`);
-            }
-
-            setTimeout(() => setErrorMessage(null), 5000);
-          });
-
-        return;
-      } else {
-        return;
-      }
-    }
-
-    const newPerson = { name: newName, number: newNumber };
-
-    comunicacion
-      .create(newPerson)
-      .then((returnedPerson) => {
-        setPersons([...persons, returnedPerson]);
-        setNewName("");
-        setNewNumber("");
-
-        setNotification(`Se agregó ${newName}`);
-        setTimeout(() => setNotification(null), 5000);
-      })
-      .catch((error) => {
-        console.error("Error al agregar persona:", error);
-        setErrorMessage(`No se pudo agregar a ${newName}`);
-        setTimeout(() => setErrorMessage(null), 5000);
-      });
-  };
-
-  const handleDelete = (id, name) => {
-    if (window.confirm(`¿Estás seguro de que quieres eliminar a ${name}?`)) {
-      comunicacion
-        .removePerson(id)
-        .then(() => {
-          setPersons(persons.filter((person) => person.id !== id));
-        })
-        .catch((error) => {
-          console.error("Error al eliminar persona:", error);
-          setErrorMessage(`No se pudo eliminar a ${name}`);
-          setTimeout(() => setErrorMessage(null), 5000);
-        });
-    }
-  };
-
-  const personsToShow = persons.filter((person) =>
-    person.name.toLowerCase().includes(search.toLowerCase())
+  const filteredCountries = countries.filter(country => 
+    country.name.common.toLowerCase().includes(filter.toLowerCase())
   );
 
   return (
     <div>
-      <h2>Phonebook</h2>
-      <Notification message={notification} type="success" />
-      <Notification message={errorMessage} type="error" />
-
-      <Filter search={search} handleSearchChange={handleSearchChange} />
-
-      <h3>Add a new</h3>
-
-      <PersonForm
-        newName={newName}
-        newNumber={newNumber}
-        handleNameChange={handleNameChange}
-        handleNumberChange={handleNumberChange}
-        addPerson={addPerson}
+      <h1>Buscar Países</h1>
+      <input 
+        value={filter} 
+        onChange={(e) => setFilter(e.target.value)} 
+        placeholder="Escribe un país..." 
       />
-
-      <h3>Numbers</h3>
-
-      <PersonList persons={personsToShow} handleDelete={handleDelete} />
+      {filteredCountries.length > 10 && <p>Demasiadas coincidencias, haz la búsqueda más específica.</p>}
+      {filteredCountries.length <= 10 && filteredCountries.length > 1 && 
+        <CountriesList countries={filteredCountries} setFilter={setFilter} />
+      }
+      {filteredCountries.length === 1 && <Country country={filteredCountries[0]} />}
     </div>
   );
 };
