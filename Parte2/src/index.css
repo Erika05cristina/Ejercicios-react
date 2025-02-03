@@ -20,3 +20,9 @@ h1 {
   text-align: center;
 }
 
+
+.error {
+  color: red;
+  background-color: lightgrey;
+  border: 2px solid red;
+}

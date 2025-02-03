@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import Filter from "./Filter";
 import PersonForm from "./PersonForm";
 import PersonList from "./PersonList";
-import axios from "axios";
 import comunicacion from "./comunicacion";
 import "./index.css";
 import Notification from "./Notification";
@@ -13,12 +12,13 @@ const App = () => {
   const [newNumber, setNewNumber] = useState("");
   const [search, setSearch] = useState("");
   const [notification, setNotification] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     comunicacion
       .getAll()
       .then((initialPersons) => setPersons(initialPersons))
-      .catch((error) => console.error("Error fetching data:", error));
+      .catch((error) => console.error("Error al obtener datos:", error));
   }, []);
 
   const handleNameChange = (event) => setNewName(event.target.value);
@@ -50,10 +50,18 @@ const App = () => {
             );
             setNewName("");
             setNewNumber("");
-           })
+          })
           .catch((error) => {
-            console.error("Error al actualizar el número:", error);
-            alert(`No se pudo actualizar el número de ${newName}`);
+            console.error("Error al actualizar:", error);
+
+            if (error.response && error.response.status === 404) {
+              setErrorMessage(`La persona '${newName}' ya fue eliminada del servidor`);
+              setPersons(persons.filter((person) => person.id !== existingPerson.id));
+            } else {
+              setErrorMessage(`Error al actualizar a ${newName}`);
+            }
+
+            setTimeout(() => setErrorMessage(null), 5000);
           });
 
         return;
@@ -70,10 +78,15 @@ const App = () => {
         setPersons([...persons, returnedPerson]);
         setNewName("");
         setNewNumber("");
-        setNotification(`Added ${newName}`);
-        setTimeout(() => setNotification(null), 5000); 
+
+        setNotification(`Se agregó ${newName}`);
+        setTimeout(() => setNotification(null), 5000);
       })
-      .catch((error) => console.error("Error al agregar persona:", error));
+      .catch((error) => {
+        console.error("Error al agregar persona:", error);
+        setErrorMessage(`No se pudo agregar a ${newName}`);
+        setTimeout(() => setErrorMessage(null), 5000);
+      });
   };
 
   const handleDelete = (id, name) => {
@@ -83,7 +96,11 @@ const App = () => {
         .then(() => {
           setPersons(persons.filter((person) => person.id !== id));
         })
-        .catch((error) => console.error("Error al eliminar persona:", error));
+        .catch((error) => {
+          console.error("Error al eliminar persona:", error);
+          setErrorMessage(`No se pudo eliminar a ${name}`);
+          setTimeout(() => setErrorMessage(null), 5000);
+        });
     }
   };
 
@@ -94,7 +111,9 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={notification} />
+      <Notification message={notification} type="success" />
+      <Notification message={errorMessage} type="error" />
+
       <Filter search={search} handleSearchChange={handleSearchChange} />
 
       <h3>Add a new</h3>
@@ -112,14 +131,6 @@ const App = () => {
       <PersonList persons={personsToShow} handleDelete={handleDelete} />
     </div>
   );
-};
-
-const getUser = () => {
-  return axios.get(baseUrl).then((response) => response.data);
-};
-
-const getUserInfo = () => {
-  return axios.get(baseUrl).then((response) => response.data);
 };
 
 export default App;
