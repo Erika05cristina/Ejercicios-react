@@ -6,6 +6,8 @@ import comunicacion from "./comunicacion";
 import "./index.css";
 import Notification from "./Notification";
 
+
+
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
