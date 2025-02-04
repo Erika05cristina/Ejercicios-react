@@ -59,11 +59,19 @@ app.delete("/api/persons/:id", (request, response) => {
 
 app.post('/api/persons', (request, response) => {
     const person = request.body;
+
+    if (!person.name || !person.number) {
+        return response.status(400).json({ error: 'Falta el nombre o el número' });
+    } else if (persons.some(p => p.name === person.name)) {
+        return response.status(400).json({ error: 'El nombre ya existe en la agenda' });
+    }
+    
     const newId = Math.floor(Math.random() * 1000);  
     
     while (persons.some(p => p.id === newId)) {
         newId = Math.floor(Math.random() * 1000);   
     }
+
  
     const newPerson = { ...person, id: newId }; 
     persons.push(newPerson);
