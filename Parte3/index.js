@@ -117,12 +117,20 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === "CastError") {
     return response.status(400).send({ error: "Malformatted ID" });
-  } else if (error.name === "ValidationError") {
-    return response.status(400).send({ error: error.message });
+  }
+  else if (error.name === "ValidationError") {
+
+    if (error.errors.number) {
+      return response.status(400).json({
+        error: 'El número de teléfono debe tener el formato correcto: XX-XXXXXXX o XXX-XXXXXXXX.'
+      });
+    }
+    return response.status(400).json({ error: error.message });
   }
 
   response.status(500).send({ error: "Internal Server Error" });
 };
+
 
 app.use(errorHandler);
 

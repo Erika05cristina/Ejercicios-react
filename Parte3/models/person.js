@@ -1,43 +1,50 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
-mongoose.set('strictQuery', false)
+mongoose.set("strictQuery", false);
 
-const url = process.env.MONGODB_URI
+const url = process.env.MONGODB_URI;
 
+console.log("connecting to", url);
 
-console.log('connecting to', url)
+mongoose
+  .connect(url)
 
-
-mongoose.connect(url)
-
-  .then(result => {
-    console.log('connected to MongoDB')
+  .then((result) => {
+    console.log("connected to MongoDB");
   })
-  .catch(error => {
-    console.log('error connecting to MongoDB:', error.message)
-  })
+  .catch((error) => {
+    console.log("error connecting to MongoDB:", error.message);
+  });
 
-  const personSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        minlength: 3,
-        required: true
-        },  
-    number: {   
-        type: String,
-        minlength: 8,
-        required: true
-        }
-  })
+const phoneNumberValidator = (value) => {
+  const phoneRegex = /^(\d{2,3})-(\d{7,8})$/;
+  return phoneRegex.test(value);
+};
 
-personSchema.set('toJSON', {
-    transform: (document, returnedObject) => {
-      returnedObject.id = returnedObject._id.toString()
-      delete returnedObject._id
-      delete returnedObject.__v
-    }
-  })
+const personSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    minlength: 3,
+    required: true,
+  },
+  number: {
+    type: String,
+    minlength: 8,
+    required: true,
+    validate: {
+      validator: phoneNumberValidator,
+      message:
+        "El número de teléfono debe tener el formato correcto: XX-XXXXXXX o XXX-XXXXXXXX.",
+    },
+  },
+});
 
+personSchema.set("toJSON", {
+  transform: (document, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString();
+    delete returnedObject._id;
+    delete returnedObject.__v;
+  },
+});
 
-module.exports = mongoose.model('Person', personSchema)
-
+module.exports = mongoose.model("Person", personSchema);
