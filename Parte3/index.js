@@ -50,6 +50,20 @@ app.delete("/api/persons/:id", (request, response, next) => {
     .catch((error) => next(error));
 });
 
+app.put("/api/persons/:id", (request, response, next) => {
+  const { number } = request.body;
+
+  if (!number) {
+    return response.status(400).json({ error: "Missing number" });
+  }
+
+  Person.findByIdAndUpdate(request.params.id, { number }, { new: true })
+    .then((updatedPerson) => {
+      response.json(updatedPerson);
+    })
+    .catch((error) => next(error));
+});
+
 app.post("/api/persons", (request, response, next) => {
   const body = request.body;
 
@@ -57,15 +71,26 @@ app.post("/api/persons", (request, response, next) => {
     return response.status(400).json({ error: "Missing name or number" });
   }
 
-  const person = new Person({
-    name: body.name,
-    number: body.number,
-  });
+  Person.findOne({ name: body.name })
+    .then((existingPerson) => {
+      if (existingPerson) {
+        return response.status(200).json({
+          message: "Person already exists",
+          id: existingPerson._id,
+        });
+      } else {
+        const person = new Person({
+          name: body.name,
+          number: body.number,
+        });
 
-  person
-    .save()
-    .then((savedPerson) => {
-      response.json(savedPerson);
+        person
+          .save()
+          .then((savedPerson) => {
+            response.json(savedPerson);
+          })
+          .catch((error) => next(error));
+      }
     })
     .catch((error) => next(error));
 });
