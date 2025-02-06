@@ -61,11 +61,19 @@ app.put("/api/persons/:id", (request, response, next) => {
     return response.status(400).json({ error: "Missing number" });
   }
 
-  Person.findByIdAndUpdate(request.params.id, { number }, { new: true })
+  Person.findByIdAndUpdate(
+    request.params.id,
+    { number },
+    { new: true, runValidators: true }
+  )
     .then((updatedPerson) => {
-      response.json(updatedPerson);
+      if (updatedPerson) {
+        response.json(updatedPerson);
+      } else {
+        response.status(404).json({ error: "Person not found" });
+      }
     })
-    .catch((error) => next(error));
+    .catch((error) => next(error)); // Manejo de errores
 });
 
 app.post("/api/persons", (request, response, next) => {
@@ -73,6 +81,11 @@ app.post("/api/persons", (request, response, next) => {
 
   if (!body.name || !body.number) {
     return response.status(400).json({ error: "Missing name or number" });
+  }
+  if (body.name.length < 3) {
+    return response
+      .status(400)
+      .json({ error: "El nombre debe tener al menos 3 caracteres" });
   }
 
   Person.findOne({ name: body.name })

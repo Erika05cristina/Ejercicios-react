@@ -6,8 +6,6 @@ import comunicacion from "./comunicacion";
 import "./index.css";
 import Notification from "./Notification";
 
-
-
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
@@ -29,6 +27,12 @@ const App = () => {
 
   const addPerson = (event) => {
     event.preventDefault();
+
+    if (newName.length < 3) {
+      setErrorMessage("El nombre debe tener al menos 3 caracteres.");
+      setTimeout(() => setErrorMessage(null), 5000);
+      return;
+    }
 
     const existingPerson = persons.find(
       (person) => person.name.toLowerCase() === newName.toLowerCase()
@@ -52,15 +56,19 @@ const App = () => {
             );
             setNewName("");
             setNewNumber("");
+
+            setNotification(`Se actualizó el número de ${newName}`);
+            setTimeout(() => setNotification(null), 5000);
           })
           .catch((error) => {
             console.error("Error al actualizar:", error);
 
-            if (error.response && error.response.status === 404) {
-              setErrorMessage(`La persona '${newName}' ya fue eliminada del servidor`);
-              setPersons(persons.filter((person) => person.id !== existingPerson.id));
+            if (error.response && error.response.data) {
+              setErrorMessage(
+                error.response.data.error || `Error al actualizar a ${newName}`
+              );
             } else {
-              setErrorMessage(`Error al actualizar a ${newName}`);
+              setErrorMessage("Error desconocido al actualizar la persona");
             }
 
             setTimeout(() => setErrorMessage(null), 5000);
@@ -86,7 +94,15 @@ const App = () => {
       })
       .catch((error) => {
         console.error("Error al agregar persona:", error);
-        setErrorMessage(`No se pudo agregar a ${newName}`);
+
+        if (error.response && error.response.data) {
+          setErrorMessage(
+            error.response.data.error || `No se pudo agregar a ${newName}`
+          );
+        } else {
+          setErrorMessage("Error desconocido al agregar la persona");
+        }
+
         setTimeout(() => setErrorMessage(null), 5000);
       });
   };
