@@ -2,12 +2,11 @@ const mongoose = require('mongoose')
 
 mongoose.set('strictQuery', false)
 
-
-// DO NOT SAVE YOUR PASSWORD TO GITHUB!!
 const url = process.env.MONGODB_URI
 
 
 console.log('connecting to', url)
+
 
 mongoose.connect(url)
 
@@ -34,4 +33,3 @@ personSchema.set('toJSON', {
 
 module.exports = mongoose.model('Person', personSchema)
 
- 
