@@ -87,3 +87,65 @@ describe('favoriteBlog', () => {
     })
   })
 })
+
+
+describe('mostBlogs', () => {
+  const listWithMultipleBlogs = [
+    {
+      _id: '5a422aa71b54a676234d17f8',
+      title: 'Blog 1',
+      author: 'Cristina',
+      url: 'https://blog1.com',
+      likes: 5,
+      __v: 0
+    },
+    {
+      _id: '5a422b3a71b54a676234d18a',
+      title: 'Blog 2',
+      author: 'Cristina',
+      url: 'https://blog1.com',
+      likes: 10,
+      __v: 0
+    },
+    {
+      _id: '5a422c1a71b54a676234d18b',
+      title: 'Blog 3',
+      author: 'Erika',
+      url: 'https://blog2.com',
+      likes: 3,
+      __v: 0
+    },
+    {
+      _id: '5a422d1a71b54a676234d18c',
+      title: 'Blog 4',
+      author: 'Edgar',
+      url: 'https://blog3.com',
+      likes: 6,
+      __v: 0
+    },
+    {
+      _id: '5a422e1a71b54a676234d18d',
+      title: 'Blog 5',
+      author: 'Juan',
+      url: 'https://blog4.com',
+      likes: 8,
+      __v: 0
+    },
+    {
+      _id: '5a422f1a71b54a676234d18e',
+      title: 'Blog 6',
+      author: 'Cristina',
+      url: 'https://blog1.com',
+      likes: 4,
+      __v: 0
+    }
+  ]
+
+  test('returns the author with the most blogs', () => {
+    const result = listHelper.mostBlogs(listWithMultipleBlogs)
+    assert.deepStrictEqual(result, {
+      author: 'Cristina',
+      blogs: 3
+    })
+  })
+})

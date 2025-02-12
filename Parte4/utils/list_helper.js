@@ -19,12 +19,23 @@ const dummy = (blogs) => {
     }
   }
   
-
+  const mostBlogs = (blogs) => {
+    const authorBlogCount = blogs.reduce((counts, blog) => {
+      counts[blog.author] = (counts[blog.author] || 0) + 1;
+      return counts;
+    }, {});
  
+    const authorArray = Object.entries(authorBlogCount).map(([author, blogs]) => {
+      return { author, blogs };
+    });
+  
+    return authorArray.reduce((max, current) => (current.blogs > max.blogs ? current : max), { blogs: 0 });
+  }
   
   module.exports = {
     dummy,
     totalLikes, 
-    favoriteBlog
+    favoriteBlog,
+    mostBlogs
   }
   
