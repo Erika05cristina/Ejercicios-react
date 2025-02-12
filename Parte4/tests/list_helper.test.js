@@ -48,3 +48,42 @@ describe('total likes', () => {
     assert.strictEqual(result, 0)
   })
 })
+
+
+describe('favoriteBlog', () => {
+  const listWithMultipleBlogs = [
+    {
+      _id: '5a422aa71b54a676234d17f8',
+      title: 'Blog 1',
+      author: 'Edsger ',
+      url: 'https://blog1',
+      likes: 5,
+      __v: 0
+    },
+    {
+      _id: '5a422b3a71b54a676234d18a',
+      title: 'Blog2',
+      author: 'Erika',
+      url: 'https://Blog2.com',
+      likes: 10,
+      __v: 0
+    },
+    {
+      _id: '5a422c1a71b54a676234d18b',
+      title: 'Blog 3',
+      author: 'Cris',
+      url: 'https://Blog3.com',
+      likes: 3,
+      __v: 0
+    }
+  ]
+
+  test('returns the blog with the most likes', () => {
+    const result = listHelper.favoriteBlog(listWithMultipleBlogs)
+    assert.deepStrictEqual(result, {
+      title: 'Blog2',
+      author: 'Erika',
+      likes: 10
+    })
+  })
+})
