@@ -1,6 +1,6 @@
-const { test, describe } = require('node:test')
-const assert = require('node:assert')
-const listHelper = require('../utils/list_helper')
+ 
+const assert = require('node:assert');
+const listHelper = require('../utils/list_helper');
 
 describe('total likes', () => {
   const listWithOneBlog = [
@@ -12,12 +12,12 @@ describe('total likes', () => {
       likes: 5,
       __v: 0
     }
-  ]
+  ];
 
   test('when list has only one blog, equals the likes of that', () => {
-    const result = listHelper.totalLikes(listWithOneBlog)
-    assert.strictEqual(result, 5)
-  })
+    const result = listHelper.totalLikes(listWithOneBlog);
+    assert.strictEqual(result, 5);
+  });
 
   const listWithMultipleBlogs = [
     {
@@ -36,18 +36,21 @@ describe('total likes', () => {
       likes: 7,
       __v: 0
     }
-  ]
+  ];
 
   test('when list has multiple blogs, equals the sum of likes', () => {
-    const result = listHelper.totalLikes(listWithMultipleBlogs)
-    assert.strictEqual(result, 12) 
-  })
+    const result = listHelper.totalLikes(listWithMultipleBlogs);
+    assert.strictEqual(result, 12);
+  });
 
   test('when list is empty, equals 0', () => {
-    const result = listHelper.totalLikes([])
-    assert.strictEqual(result, 0)
-  })
-})
+    const result = listHelper.totalLikes([]);
+    assert.strictEqual(result, 0);
+  });
+});
+
+// Resto de los tests (sin cambios)...
+
 
 
 describe('favoriteBlog', () => {
