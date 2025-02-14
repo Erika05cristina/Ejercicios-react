@@ -38,6 +38,7 @@ describe('API de Blogs', () => {
   })
 
 })
+
 test('Debe devolver 400 si faltan title o url', async () => {  
   const blogSinTitulo = { author: 'Anonimo', url: 'http://example.com', likes: 10 }
   const blogSinUrl = { title: 'Blog sin URL', author: 'Anonimo', likes: 5 }
