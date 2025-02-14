@@ -1,5 +1,5 @@
 const supertest = require('supertest')
-const app = require('../main') // Importamos la aplicación desde main.js
+const app = require('../main') 
 const Blog = require('../models/blog')
 const mongoose = require('mongoose')
 
@@ -7,8 +7,7 @@ const api = supertest(app)
 let server
 
 beforeAll(async () => {
-  // Iniciar el servidor en el bloque beforeAll
-  await Blog.deleteMany({})  // Limpiar la base de datos
+  await Blog.deleteMany({})
 
   const newBlog = new Blog({
     title: 'Prueba de ID',
@@ -16,43 +15,39 @@ beforeAll(async () => {
     url: 'http://example.com',
     likes: 10
   })
-  await newBlog.save()  // Guardar el blog en la base de datos para la prueba
-
-  // Iniciar el servidor y guardarlo en la variable 'server'
+  await newBlog.save() 
   server = app.listen(3003, () => {
     console.log(`🚀 Servidor corriendo en el puerto 3003`)
   })
 })
 
-describe('Verificar ID de los blogs', () => {
-  test('la propiedad de identificador único se llama id', async () => {
-    const response = await api.get('/api/blogs')
-    const blogs = response.body
+describe('Verificar creación de un nuevo blog', () => {
+  test('debe crear un nuevo blog y aumentar el número total de blogs en 1', async () => {
+    const newBlog = {
+      title: 'Nuevo blog',
+      author: 'Cristina',
+      url: 'http://example.com/nuevo-blog',
+      likes: 5
+    }
 
-    // Verificamos que haya al menos un blog
-    expect(blogs.length).toBeGreaterThan(0)
-
-    // Verificamos que el primer blog tenga la propiedad 'id'
-    expect(blogs[0].id).toBeDefined()
-    expect(typeof blogs[0].id).toBe('string')
-
-    // Aseguramos que no exista la propiedad '_id'
-    expect(blogs[0]._id).toBeUndefined()
+    const response = await api.post('/api/blogs').send(newBlog)
+    expect(response.status).toBe(201)
+    const blogsAtEnd = await Blog.find({})
+    expect(blogsAtEnd.length).toBe(2)  
+    const titles = blogsAtEnd.map(blog => blog.title)
+    expect(titles).toContain('Nuevo blog')
   })
 })
 
 afterAll(async () => {
-    // Cerrar la conexión a la base de datos
-    await mongoose.connection.close()
-  
-    // Asegurarnos de que el servidor se cierre de manera correcta y esperar su cierre
-    if (server) {
-      await new Promise((resolve) => {
-        server.close(() => {
-          console.log('Servidor detenido después de las pruebas')
-          resolve()  // Resolver la promesa cuando el servidor haya cerrado
-        })
+  await mongoose.connection.close()
+
+  if (server) {
+    await new Promise((resolve) => {
+      server.close(() => {
+        console.log('Servidor detenido después de las pruebas')
+        resolve() 
       })
-    }
-  })
-  
+    })
+  }
+})

@@ -213,3 +213,15 @@ describe('mostLikes', () => {
     });
   });
 });
+
+test('si la propiedad likes falta en la solicitud, debe tener el valor 0 por defecto', async () => {
+  const newBlog = {
+    title: 'Blog sin likes',
+    author: 'Autor desconocido',
+    url: 'http://example.com/blog-sin-likes'
+  }
+
+  const response = await api.post('/api/blogs').send(newBlog).expect(201)
+  expect(response.body.likes).toBe(0)
+})
+
