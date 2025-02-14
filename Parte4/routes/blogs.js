@@ -31,4 +31,16 @@ router.post('/', async (req, res) => {
   }
 })
 
+router.delete('/:id', async (request, response) => {
+  try {
+    const deletedBlog = await Blog.findByIdAndDelete(request.params.id)
+    if (!deletedBlog) {
+      return response.status(404).json({ error: 'Blog no encontrado' })
+    }
+    response.status(204).end()  // 204 No Content cuando se elimina correctamente
+  } catch (error) {
+    response.status(400).json({ error: 'ID inválido' })
+  }
+})
+
 module.exports = router
