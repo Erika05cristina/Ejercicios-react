@@ -4,7 +4,7 @@ const connectDB = require('./utils/db')
 const { PORT } = require('./utils/config')
 const blogsRouter = require('./routes/blogs')
 const usersRouter = require('./routes/users')
-
+const { tokenExtractor } = require('./utils/middleware');
 const app = express()
 
 connectDB()
