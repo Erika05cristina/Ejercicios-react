@@ -1,4 +1,5 @@
 const express = require('express')
+const User = require('../models/user')
 const Blog = require('../models/blog')
 
 const router = express.Router()
@@ -7,28 +8,40 @@ const router = express.Router()
 router.get('/', async (req, res) => {
   try {
     const blogs = await Blog.find({})
+      .populate('user', { username: 1, name: 1 })
+
     res.json(blogs)
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener blogs' })
   }
 })
 
+
 // Crear un nuevo blog
 router.post('/', async (req, res) => {
-  try {
-    const { title, url, author, likes } = req.body
+  const { title, author, url, likes } = req.body
 
-    if (!title || !url) {
-      return res.status(400).json({ error: 'El título y la URL son obligatorios' })
-    }
+  const users = await User.find({})
+  const randomUser = users[0]
 
-    const blog = new Blog({ title, author, url, likes })
-    const savedBlog = await blog.save()
-
-    res.status(201).json(savedBlog)
-  } catch (error) {
-    res.status(500).json({ error: 'Error al guardar el blog' })
+  if (!randomUser) {
+    return res.status(400).json({ error: 'No users found in the database' })
   }
+
+  const blog = new Blog({
+    title,
+    author,
+    url,
+    likes: likes || 0,
+    user: randomUser._id  
+  })
+
+  const savedBlog = await blog.save()
+
+  randomUser.blogs = randomUser.blogs.concat(savedBlog._id)
+  await randomUser.save()
+
+  res.status(201).json(savedBlog)
 })
 
 router.put('/:id', async (req, res) => {

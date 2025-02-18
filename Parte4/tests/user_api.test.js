@@ -57,7 +57,11 @@ test('No se permite username duplicado', async () => {
 
   expect(response.body.error).toBe('Username must be unique')
 })
-
+test('GET /api/users muestra los blogs creados por cada usuario', async () => {
+    const response = await api.get('/api/users').expect(200)
+    expect(response.body[0].blogs).toBeDefined()
+  })
+  
 afterAll(() => {
   mongoose.connection.close()
 })
