@@ -71,16 +71,35 @@ router.put('/:id', async (req, res) => {
 })
 
 
-router.delete('/:id', async (request, response) => {
+router.delete('/:id', tokenExtractor, async (req, res) => {
+  const { id } = req.params
+  const token = req.token
+
+  if (!token) {
+    return res.status(401).json({ error: 'Token faltante o inválido' })
+  }
+
   try {
-    const deletedBlog = await Blog.findByIdAndDelete(request.params.id)
-    if (!deletedBlog) {
-      return response.status(404).json({ error: 'Blog no encontrado' })
+
+    const decodedToken = jwt.verify(token, process.env.SECRET)
+    const userIdFromToken = decodedToken.id
+
+    const blog = await Blog.findById(id)
+
+    if (!blog) {
+      return res.status(404).json({ error: 'Blog no encontrado' })
     }
-    response.status(204).end()  // 204 No Content cuando se elimina correctamente
+
+    if (blog.user.toString() !== userIdFromToken) {
+      return res.status(403).json({ error: 'No tienes permiso para eliminar este blog' })
+    }
+    await Blog.findByIdAndRemove(id)
+
+    res.status(204).end()   
   } catch (error) {
-    response.status(400).json({ error: 'ID inválido' })
+    res.status(400).json({ error: 'ID inválido o token incorrecto' })
   }
 })
+
 
 module.exports = router
