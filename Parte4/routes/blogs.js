@@ -1,6 +1,8 @@
 const express = require('express')
 const User = require('../models/user')
 const Blog = require('../models/blog')
+const { tokenExtractor } = require('../utils/milddleware');
+const jwt = require('jsonwebtoken');
 
 const router = express.Router()
 
@@ -17,15 +19,17 @@ router.get('/', async (req, res) => {
 })
 
 
-// Crear un nuevo blog
-router.post('/', async (req, res) => {
-  const { title, author, url, likes } = req.body
+router.post('/', tokenExtractor, async (request, response) => {
+  const { title, author, url, likes } = request.body;
 
-  const users = await User.find({})
-  const randomUser = users[0]
+  const decodedToken = jwt.verify(request.token, process.env.SECRET);
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token missing or invalid' });
+  }
 
-  if (!randomUser) {
-    return res.status(400).json({ error: 'No users found in the database' })
+  const user = await User.findById(decodedToken.id);
+  if (!user) {
+    return response.status(400).json({ error: 'User not found' });
   }
 
   const blog = new Blog({
@@ -33,16 +37,17 @@ router.post('/', async (req, res) => {
     author,
     url,
     likes: likes || 0,
-    user: randomUser._id  
-  })
+    user: user._id,
+  });
 
-  const savedBlog = await blog.save()
+  const savedBlog = await blog.save();
 
-  randomUser.blogs = randomUser.blogs.concat(savedBlog._id)
-  await randomUser.save()
+  user.blogs = user.blogs.concat(savedBlog._id);
+  await user.save();
 
-  res.status(201).json(savedBlog)
-})
+  response.status(201).json(savedBlog);
+});
+
 
 router.put('/:id', async (req, res) => {
   try {

@@ -9,12 +9,9 @@ usersRouter.get('/', async (req, res) => {
   const users = await User.find({})
   res.json(users)
 })
+ 
 
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-const User = require('../models/user');
-
-router.post('/login', async (request, response) => {
+usersRouter.post('/login', async (request, response) => {
   const { username, password } = request.body;
 
   const user = await User.findOne({ username });
