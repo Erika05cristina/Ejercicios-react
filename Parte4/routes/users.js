@@ -10,25 +10,34 @@ usersRouter.get('/', async (req, res) => {
   res.json(users)
 })
 
-// Crear un nuevo usuario
 usersRouter.post('/', async (req, res) => {
-  const { username, name, password } = req.body
+    const { username, name, password } = req.body
 
-  if (!password) {
-    return res.status(400).json({ error: 'Password is required' })
-  }
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' })
+    }
 
-  const saltRounds = 10
-  const passwordHash = await bcrypt.hash(password, saltRounds)
-
-  const user = new User({
-    username,
-    name,
-    passwordHash
+    if (username.length < 3 || password.length < 3) {
+      return res.status(400).json({ error: 'Username and password must be at least 3 characters long' })
+    }
+  
+    const existingUser = await User.findOne({ username })
+    if (existingUser) {
+      return res.status(400).json({ error: 'Username must be unique' })
+    }
+  
+    const saltRounds = 10
+    const passwordHash = await bcrypt.hash(password, saltRounds)
+  
+    const user = new User({
+      username,
+      name,
+      passwordHash
+    })
+  
+    const savedUser = await user.save()
+    res.status(201).json(savedUser)
   })
-
-  const savedUser = await user.save()
-  res.status(201).json(savedUser)
-})
+  
 
 module.exports = usersRouter
