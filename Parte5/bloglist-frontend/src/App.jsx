@@ -8,6 +8,12 @@ const App = () => {
   const [user, setUser] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [newBlog, setNewBlog] = useState({
+    title: '',
+    author: '',
+    url: '',
+    likes: 0
+  })
 
   useEffect(() => {
     const loggedUserJSON = localStorage.getItem('loggedUser')
@@ -15,21 +21,9 @@ const App = () => {
       const user = JSON.parse(loggedUserJSON)
       setUser(user)
       blogService.setToken(user.token)
+      blogService.getAll().then(blogs => setBlogs(blogs))
     }
   }, [])
-  
-  useEffect(() => {
-    if (user) {  // Solo obtener blogs si hay usuario autenticado
-      blogService.getAll().then(blogs => {
-        console.log('Blogs recibidos:', blogs)  // 👀 Verifica qué llega del backend
-        setBlogs(blogs)
-      }).catch(error => {
-        console.error('Error obteniendo blogs:', error)
-      })
-    }
-  }, [user])  // 🔥 Se ejecuta cada vez que cambia `user`
-  
-  
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -37,17 +31,42 @@ const App = () => {
       const user = await loginService.login({ username, password })
       setUser(user)
       blogService.setToken(user.token)
-      localStorage.setItem('loggedUser', JSON.stringify(user)) 
+      localStorage.setItem('loggedUser', JSON.stringify(user))
       setUsername('')
       setPassword('')
     } catch (error) {
       console.error('Error al iniciar sesión', error)
     }
   }
+
   const handleLogout = () => {
     setUser(null)
-    localStorage.removeItem('loggedUser')  
-    blogService.setToken(null)  
+    localStorage.removeItem('loggedUser')
+    blogService.setToken(null)
+  }
+
+  const handleNewBlogChange = (event) => {
+    const { name, value } = event.target
+    setNewBlog({
+      ...newBlog,
+      [name]: value
+    })
+  }
+
+  const handleNewBlogSubmit = async (event) => {
+    event.preventDefault()
+    try {
+      const createdBlog = await blogService.create(newBlog)
+      setBlogs(blogs.concat(createdBlog))
+      setNewBlog({
+        title: '',
+        author: '',
+        url: '',
+        likes: 0
+      })
+    } catch (error) {
+      console.error('Error al crear un blog', error)
+    }
   }
 
   if (user === null) {
@@ -81,17 +100,63 @@ const App = () => {
     <div>
       <h2>blogs</h2>
       <p>{user.name} logged in</p>
-      <button onClick={handleLogout}>Logout</button> {/* Botón de logout */}
+      <button onClick={handleLogout}>Logout</button>
+
+      <h3>Create a new blog</h3>
+      <form onSubmit={handleNewBlogSubmit}>
+        <div>
+          <label>Title</label>
+          <input
+            type="text"
+            name="title"
+            value={newBlog.title}
+            onChange={handleNewBlogChange}
+            required
+          />
+        </div>
+        <div>
+          <label>Author</label>
+          <input
+            type="text"
+            name="author"
+            value={newBlog.author}
+            onChange={handleNewBlogChange}
+            required
+          />
+        </div>
+        <div>
+          <label>URL</label>
+          <input
+            type="text"
+            name="url"
+            value={newBlog.url}
+            onChange={handleNewBlogChange}
+            required
+          />
+        </div>
+        <div>
+          <label>Likes</label>
+          <input
+            type="number"
+            name="likes"
+            value={newBlog.likes}
+            onChange={handleNewBlogChange}
+            min="0"
+          />
+        </div>
+        <button type="submit">Create Blog</button>
+      </form>
+
       {blogs.map(blog => (
-        <div >
+        <div key={blog.id} style={{ marginBottom: '20px', padding: '10px', border: '1px solid #ddd' }}>
           <h3>{blog.title}</h3>
+          <p><strong>Author:</strong> {blog.author}</p>
           <p><strong>Url:</strong> <a href={blog.url} target="_blank" rel="noopener noreferrer">{blog.url}</a></p>
           <p><strong>Likes:</strong> {blog.likes}</p>
         </div>
       ))}
     </div>
   )
-  
 }
 
 export default App
