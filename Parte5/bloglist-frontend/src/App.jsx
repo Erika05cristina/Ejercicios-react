@@ -8,6 +8,7 @@ const App = () => {
   const [user, setUser] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [notification, setNotification] = useState({ message: '', type: '' })
   const [newBlog, setNewBlog] = useState({
     title: '',
     author: '',
@@ -34,8 +35,10 @@ const App = () => {
       localStorage.setItem('loggedUser', JSON.stringify(user))
       setUsername('')
       setPassword('')
+      showNotification('Login successful', 'success')
     } catch (error) {
       console.error('Error al iniciar sesión', error)
+      showNotification('Invalid username or password', 'error')
     }
   }
 
@@ -43,6 +46,7 @@ const App = () => {
     setUser(null)
     localStorage.removeItem('loggedUser')
     blogService.setToken(null)
+    showNotification('Logged out successfully', 'success')
   }
 
   const handleNewBlogChange = (event) => {
@@ -64,9 +68,18 @@ const App = () => {
         url: '',
         likes: 0
       })
+      showNotification('New blog created successfully', 'success')
     } catch (error) {
       console.error('Error al crear un blog', error)
+      showNotification('Error creating blog', 'error')
     }
+  }
+
+  const showNotification = (message, type) => {
+    setNotification({ message, type })
+    setTimeout(() => {
+      setNotification({ message: '', type: '' }) // Limpia la notificación después de 3 segundos
+    }, 3000)
   }
 
   if (user === null) {
@@ -92,6 +105,18 @@ const App = () => {
           </div>
           <button type="submit">Login</button>
         </form>
+        {notification.message && (
+          <div style={{
+            padding: '10px',
+            backgroundColor: notification.type === 'success' ? 'green' : 'red',
+            color: 'white',
+            marginBottom: '20px',
+            borderRadius: '5px',
+            textAlign: 'center'
+          }}>
+            {notification.message}
+          </div>
+        )}
       </div>
     )
   }
@@ -101,6 +126,19 @@ const App = () => {
       <h2>blogs</h2>
       <p>{user.name} logged in</p>
       <button onClick={handleLogout}>Logout</button>
+
+      {notification.message && (
+        <div style={{
+          padding: '10px',
+          backgroundColor: notification.type === 'success' ? 'green' : 'red',
+          color: 'white',
+          marginBottom: '20px',
+          borderRadius: '5px',
+          textAlign: 'center'
+        }}>
+          {notification.message}
+        </div>
+      )}
 
       <h3>Create a new blog</h3>
       <form onSubmit={handleNewBlogSubmit}>
@@ -151,7 +189,7 @@ const App = () => {
         <div key={blog.id} style={{ marginBottom: '20px', padding: '10px', border: '1px solid #ddd' }}>
           <h3>{blog.title}</h3>
           <p><strong>Author:</strong> {blog.author}</p>
-          <p><strong>Url:</strong> <a href={blog.url} target="_blank" rel="noopener noreferrer">{blog.url}</a></p>
+          <p><strong>URL:</strong> <a href={blog.url} target="_blank" rel="noopener noreferrer">{blog.url}</a></p>
           <p><strong>Likes:</strong> {blog.likes}</p>
         </div>
       ))}
