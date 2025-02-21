@@ -6,20 +6,25 @@ const jwt = require('jsonwebtoken');
 
 const router = express.Router()
 
-// Obtener todos los blogs 
-router.get('/', userExtractor, async (req, res) => {   
+router.get('/', async (req, res) => {   
   try {
+    console.log('Obteniendo blogs...');
+
     const blogs = await Blog.find({})
       .populate('user', { username: 1, name: 1 });
 
+    console.log('Blogs encontrados:', blogs); // <-- Agregar este log
+
     res.json(blogs);
   } catch (error) {
+    console.error('Error en GET /api/blogs:', error);
     res.status(500).json({ error: 'Error al obtener blogs' });
   }
 });
 
-
 router.post('/', userExtractor, async (request, response) => {
+
+  console.log('Request user:', request.user);
   const { title, author, url, likes } = request.body;
   const user = request.user;  
 

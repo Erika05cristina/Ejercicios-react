@@ -10,19 +10,44 @@ const App = () => {
   const [password, setPassword] = useState('')
 
   useEffect(() => {
-    blogService.getAll().then(blogs => setBlogs(blogs))
+    const loggedUserJSON = localStorage.getItem('loggedUser')
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user)
+      blogService.setToken(user.token)
+    }
   }, [])
+  
+  useEffect(() => {
+    if (user) {  // Solo obtener blogs si hay usuario autenticado
+      blogService.getAll().then(blogs => {
+        console.log('Blogs recibidos:', blogs)  // 👀 Verifica qué llega del backend
+        setBlogs(blogs)
+      }).catch(error => {
+        console.error('Error obteniendo blogs:', error)
+      })
+    }
+  }, [user])  // 🔥 Se ejecuta cada vez que cambia `user`
+  
+  
 
   const handleLogin = async (event) => {
     event.preventDefault()
     try {
       const user = await loginService.login({ username, password })
       setUser(user)
+      blogService.setToken(user.token)
+      localStorage.setItem('loggedUser', JSON.stringify(user)) 
       setUsername('')
       setPassword('')
     } catch (error) {
       console.error('Error al iniciar sesión', error)
     }
+  }
+  const handleLogout = () => {
+    setUser(null)
+    localStorage.removeItem('loggedUser')  
+    blogService.setToken(null)  
   }
 
   if (user === null) {
@@ -56,11 +81,17 @@ const App = () => {
     <div>
       <h2>blogs</h2>
       <p>{user.name} logged in</p>
-      {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
-      )}
+      <button onClick={handleLogout}>Logout</button> {/* Botón de logout */}
+      {blogs.map(blog => (
+        <div >
+          <h3>{blog.title}</h3>
+          <p><strong>Url:</strong> <a href={blog.url} target="_blank" rel="noopener noreferrer">{blog.url}</a></p>
+          <p><strong>Likes:</strong> {blog.likes}</p>
+        </div>
+      ))}
     </div>
   )
+  
 }
 
 export default App
