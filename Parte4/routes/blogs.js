@@ -1,22 +1,22 @@
 const express = require('express')
 const User = require('../models/user')
 const Blog = require('../models/blog')
-const { tokenExtractor } = require('../utils/milddleware');
+const { userExtractor } = require('../utils/milddleware');
 const jwt = require('jsonwebtoken');
 
 const router = express.Router()
 
-// Obtener todos los blogs
-router.get('/', async (req, res) => {
+// Obtener todos los blogs 
+router.get('/', userExtractor, async (req, res) => {   
   try {
     const blogs = await Blog.find({})
-      .populate('user', { username: 1, name: 1 })
+      .populate('user', { username: 1, name: 1 });
 
-    res.json(blogs)
+    res.json(blogs);
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener blogs' })
+    res.status(500).json({ error: 'Error al obtener blogs' });
   }
-})
+});
 
 
 router.post('/', userExtractor, async (request, response) => {

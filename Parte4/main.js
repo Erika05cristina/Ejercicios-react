@@ -4,7 +4,7 @@ const connectDB = require('./utils/db')
 const { PORT } = require('./utils/config')
 const blogsRouter = require('./routes/blogs')
 const usersRouter = require('./routes/users')
-const { tokenExtractor } = require('./utils/middleware');
+const { tokenExtractor } = require('./utils/milddleware');
 const app = express()
 
 connectDB()
@@ -14,5 +14,9 @@ app.use(express.json())
 
 app.use('/api/blogs', blogsRouter)
 app.use('/api/users', usersRouter) 
+
+app.listen(PORT, () => {
+    console.log(`Servidor corriendo en el puerto ${PORT}`);
+  });
 
 module.exports = app
