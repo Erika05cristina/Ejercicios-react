@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Blog from "./components/Blog";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
+import BlogForm from "./components/BlogForm";
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
@@ -69,6 +70,7 @@ const App = () => {
         url: "",
         likes: 0,
       });
+      setFormVisible(false);
       showNotification("New blog created successfully", "success");
     } catch (error) {
       console.error("Error al crear un blog", error);
@@ -149,52 +151,12 @@ const App = () => {
       {!formVisible ? (
         <button onClick={() => setFormVisible(true)}>Create new blog</button>
       ) : (
-        <div>
-          <form onSubmit={handleNewBlogSubmit}>
-            <div>
-              <label>Title</label>
-              <input
-                type="text"
-                name="title"
-                value={newBlog.title}
-                onChange={handleNewBlogChange}
-                required
-              />
-            </div>
-            <div>
-              <label>Author</label>
-              <input
-                type="text"
-                name="author"
-                value={newBlog.author}
-                onChange={handleNewBlogChange}
-                required
-              />
-            </div>
-            <div>
-              <label>URL</label>
-              <input
-                type="text"
-                name="url"
-                value={newBlog.url}
-                onChange={handleNewBlogChange}
-                required
-              />
-            </div>
-            <div>
-              <label>Likes</label>
-              <input
-                type="number"
-                name="likes"
-                value={newBlog.likes}
-                onChange={handleNewBlogChange}
-                min="0"
-              />
-            </div>
-            <button type="submit">Create Blog</button>
-            <button onClick={() => setFormVisible(false)}>Cancel</button>
-          </form>
-        </div>
+        <BlogForm
+          handleNewBlogSubmit={handleNewBlogSubmit}
+          newBlog={newBlog}
+          handleNewBlogChange={handleNewBlogChange}
+          setFormVisible={setFormVisible}
+        />
       )}
 
       {blogs.map((blog) => (
