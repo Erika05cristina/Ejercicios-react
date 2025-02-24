@@ -126,6 +126,10 @@ const App = () => {
       </div>
     );
   }
+  const updateBlog = async (id, updatedBlog) => {
+    const newBlog = await blogService.update(id, updatedBlog);
+    setBlogs(blogs.map((blog) => (blog.id === id ? newBlog : blog)));
+  };
 
   return (
     <div>
@@ -160,7 +164,7 @@ const App = () => {
       )}
 
       {blogs.map((blog) => (
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} blog={blog} updateBlog={updateBlog} />
       ))}
     </div>
   );
