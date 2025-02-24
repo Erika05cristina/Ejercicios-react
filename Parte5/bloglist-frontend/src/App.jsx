@@ -160,28 +160,7 @@ const App = () => {
       )}
 
       {blogs.map((blog) => (
-        <div
-          key={blog.id}
-          style={{
-            marginBottom: "20px",
-            padding: "10px",
-            border: "1px solid #ddd",
-          }}
-        >
-          <h3>{blog.title}</h3>
-          <p>
-            <strong>Author:</strong> {blog.author}
-          </p>
-          <p>
-            <strong>URL:</strong>{" "}
-            <a href={blog.url} target="_blank" rel="noopener noreferrer">
-              {blog.url}
-            </a>
-          </p>
-          <p>
-            <strong>Likes:</strong> {blog.likes}
-          </p>
-        </div>
+        <Blog key={blog.id} blog={blog} />
       ))}
     </div>
   );
