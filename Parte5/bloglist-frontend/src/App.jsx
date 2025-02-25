@@ -129,7 +129,27 @@ const App = () => {
   const updateBlog = async (id, updatedBlog) => {
     const newBlog = await blogService.update(id, updatedBlog);
     setBlogs(blogs.map((blog) => (blog.id === id ? newBlog : blog)));
-  };
+  }
+  
+  const deleteBlog = async (id) => {
+    try {
+      const user = JSON.parse(window.localStorage.getItem("loggedUser"));
+      if (!user || !user.token) {
+        throw new Error("Token not found");
+      }
+      const blogToDelete = blogs.find((blog) => blog.id === id)
+      if (blogToDelete.author !== user.username) {
+        showNotification("You are not authorized to delete this blog", "error");
+        return;
+      }
+      await blogService.remove(id, user.token);
+      setBlogs(blogs.filter((blog) => blog.id !== id));
+      showNotification("Blog deleted successfully", "success");
+    } catch (error) {
+      console.error("Error eliminando blog:", error);
+      showNotification("Error deleting blog", "error");
+    }
+  }
 
   return (
     <div>
@@ -166,7 +186,7 @@ const App = () => {
       {blogs
         .sort((a, b) => b.likes - a.likes) 
         .map((blog) => (
-          <Blog key={blog.id} blog={blog} updateBlog={updateBlog} />
+          <Blog key={blog.id} blog={blog} updateBlog={updateBlog} deleteBlog={deleteBlog} user={user}/>
         ))}
     </div>
   );

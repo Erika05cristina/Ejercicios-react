@@ -70,19 +70,23 @@ router.put('/:id', async (req, res) => {
 
 
 router.delete('/:id', userExtractor, async (request, response) => {
-  const blog = await Blog.findById(request.params.id);
-  const user = request.user; 
+  const blog = await Blog.findById(request.params.id).populate('user'); 
+  const user = request.user;
 
   if (!blog) {
     return response.status(404).json({ error: 'Blog not found' });
   }
- 
-  if (blog.user.toString() !== user._id.toString()) {
+
+  if (!blog.user) {  // 💡 Agregar este chequeo
+    return response.status(400).json({ error: 'Blog does not have an associated user' });
+  }
+
+  if (blog.user._id.toString() !== user._id.toString()) {
     return response.status(403).json({ error: 'Unauthorized to delete this blog' });
   }
 
-  await Blog.findByIdAndRemove(request.params.id);
-  response.status(204).end();  
+  await Blog.findByIdAndDelete(request.params.id);
+  response.status(204).end();
 });
 
 

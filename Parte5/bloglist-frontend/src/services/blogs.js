@@ -28,7 +28,21 @@ const update = async (id, updatedBlog) => {
   };
   const response = await axios.put(`${baseUrl}/${id}`, updatedBlog, config);
   return response.data;
+}
+
+const remove = async (id, token) => {
+  if (!token) {
+    throw new Error('Token is missing');
+  }
+
+  const config = {
+    headers: { Authorization: `Bearer ${token}` }
+  };
+
+  const response = await axios.delete(`${baseUrl}/${id}`, config);
+  return response.data;
 };
 
 
-export default { getAll, setToken, create, update }
+
+export default { getAll, setToken, create, update, remove }

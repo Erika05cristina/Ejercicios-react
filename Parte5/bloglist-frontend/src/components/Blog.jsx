@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const Blog = ({ blog, updateBlog }) => {
+const Blog = ({ blog, updateBlog, deleteBlog, user }) => {
   const [showDetails, setShowDetails] = useState(false);
 
   const toggleDetails = () => {
@@ -12,6 +12,11 @@ const Blog = ({ blog, updateBlog }) => {
       likes: blog.likes + 1
     };
     await updateBlog(blog.id, updatedBlog);
+  };
+  const handleDelete = async () => {
+    if (window.confirm(`Delete blog "${blog.title}" by ${blog.author}?`)) {
+      await deleteBlog(blog.id);
+    }
   };
 
   const blogStyle = {
@@ -32,6 +37,11 @@ const Blog = ({ blog, updateBlog }) => {
           <p>URL: <a href={blog.url} target="_blank" rel="noopener noreferrer">{blog.url}</a></p>
           <p>Likes: {blog.likes}<button onClick={handleLike}>Like</button></p>
           <p>Author: {blog.author}</p>
+          
+            <button onClick={handleDelete} style={{ background: 'red', color: 'white' }}>
+              Delete
+            </button>
+          
         </div>
       )}
     </div>
