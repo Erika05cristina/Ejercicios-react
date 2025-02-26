@@ -30,14 +30,14 @@ const Blog = ({ blog, updateBlog, deleteBlog, user }) => {
 
   return (
     <div style={blogStyle}>
-      <div>
+      <div className="blog-summary">
         {blog.title} {blog.author}
         <button onClick={toggleDetails}>
           {showDetails ? 'Hide' : 'View'}
         </button>
       </div>
       {showDetails && (
-        <div>
+        <div className="blog-details">
           <p>URL: <a href={blog.url} target="_blank" rel="noopener noreferrer">{blog.url}</a></p>
           <p>Likes: {blog.likes}<button onClick={handleLike}>Like</button></p>
           <p>Author: {blog.author}</p>

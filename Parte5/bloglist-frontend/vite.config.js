@@ -12,4 +12,8 @@ export default defineConfig({
       },
     },
   },
+  test: {
+    globals: true,  // Hace que 'expect' esté disponible globalmente
+    environment: 'jsdom',  // Simula un entorno de navegador para pruebas con React
+  },
 })
