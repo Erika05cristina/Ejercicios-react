@@ -1,8 +1,5 @@
 const BlogForm = ({ handleNewBlogSubmit, newBlog, handleNewBlogChange, setFormVisible }) => {
-  const submitHandler = (e) => {
-    e.preventDefault();
-    handleNewBlogSubmit(newBlog); // Verifica que esta función esté siendo llamada
-  };
+
     return (
       <div>
         <form onSubmit={handleNewBlogSubmit} data-testid="blog-form">
