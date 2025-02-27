@@ -86,37 +86,70 @@ describe("Blog app", function () {
     });
 
     it('User who created the blog can delete it', function () {
-      // Crear un blog
-      cy.contains('Create new blog').should('be.visible').click();
-      cy.get('input[name="title"]').type('Cypress Testing');
-      cy.get('input[name="author"]').type('villa');
-      cy.get('input[name="url"]').type('https://cypress.io');
-      cy.get('button').contains('Create').click();
-      cy.contains('Cypress Testing villa');
-    
-      // Ver el blog y hacer clic en "View"
       cy.contains('Cypress Testing villa')
-        .parent() // Encuentra el blog
+        .parent() 
         .find('button')
-        .contains('View') // Encuentra el botón "View"
-        .click(); // Haz clic en "View"
-    
-      // Verifica que el botón "Delete" está presente y es visible
+        .contains('View') 
+        .click(); 
       cy.contains('Cypress Testing villa')
-        .parent() // Encuentra el blog
+        .parent() 
         .find('button')
-        .contains('Delete') // Encuentra el botón "Delete"
-        .should('be.visible') // Asegura que el botón de eliminar esté visible
-    
-      // Hacer clic en "Delete"
+        .contains('Delete') 
+        .should('be.visible')
+   
       cy.contains('Cypress Testing villa')
         .parent()
         .find('button')
         .contains('Delete')
-        .click(); // Clic en el botón "Delete"
+        .click(); 
+      cy.contains('Cypress Testing villa').should('not.exist');
+    });
     
-      // Verifica que el blog haya sido eliminado
-      cy.contains('Cypress Testing villa').should('not.exist'); // Asegura que el blog ya no existe
+
+    it('Blogs are ordered by likes', function () {
+      cy.contains('Create new blog').should('be.visible').click();
+      cy.get('input[name="title"]').type('Blog with less likes');
+      cy.get('input[name="author"]').type('villa');
+      cy.get('input[name="url"]').type('https://lesslikes.com');
+      cy.get('button').contains('Create').click();
+      cy.contains('Blog with less likes villa');
+
+      cy.contains('Create new blog').should('be.visible').click();
+      cy.get('input[name="title"]').type('Blog with more likes');
+      cy.get('input[name="author"]').type('villa');
+      cy.get('input[name="url"]').type('https://morelikes.com');
+      cy.get('button').contains('Create').click();
+      cy.contains('Blog with more likes villa');
+    
+      cy.contains('Blog with more likes villa')
+        .parent()
+        .find('button')
+        .contains('View')
+        .click();
+      cy.contains('Blog with more likes villa')
+        .parent()
+        .find('button')
+        .contains('Like')
+        .click(); 
+
+      cy.contains('Blog with less likes villa')
+        .parent()
+        .find('button')
+        .contains('View')
+        .click();
+      cy.contains('Blog with less likes villa')
+        .parent()
+        .find('button')
+        .contains('Like')
+        .click();
+
+      cy.get('.blog')
+        .eq(0)
+        .should('contain', 'Blog with more likes');
+    
+      cy.get('.blog')
+        .eq(1)
+        .should('contain', 'Blog with less likes');
     });
     
   });
