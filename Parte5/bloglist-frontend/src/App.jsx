@@ -93,6 +93,7 @@ const App = () => {
           <div>
             Username
             <input
+              name="username"
               type="text"
               value={username}
               onChange={({ target }) => setUsername(target.value)}
@@ -101,6 +102,7 @@ const App = () => {
           <div>
             Password
             <input
+              name="password"
               type="password"
               value={password}
               onChange={({ target }) => setPassword(target.value)}
@@ -191,7 +193,7 @@ const App = () => {
             blog={blog}
             updateBlog={updateBlog}
             deleteBlog={deleteBlog}
-            user={user ? user : { id: null }}  
+            user={user ? user : { id: null }}
           />
         ))}
     </div>
