@@ -54,25 +54,18 @@ describe("Blog app", function () {
 
   describe('When logged in', function() {
     beforeEach(function() {
-      cy.visit('http://localhost:5173'); // Visit after session is set up
+      cy.visit('http://localhost:5173');  
     });
 
     it('A blog can be created', function() {
-      // Asegura que el botón de "Create new blog" está presente antes de hacer clic
       cy.contains('Create new blog').should('be.visible').click();
   
-      // Verifica que el formulario se haya mostrado
       cy.get('input[name="title"]').should('be.visible');
   
-      // Llena el formulario
       cy.get('input[name="title"]').type('Cypress Testing');
       cy.get('input[name="author"]').type('villa');
       cy.get('input[name="url"]').type('https://cypress.io');
-  
-      // Envía el formulario
       cy.get('button').contains('Create').click();
-  
-      // Verifica que el nuevo blog aparece en la lista
       cy.contains('Cypress Testing villa');
     });
   });
