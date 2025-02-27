@@ -84,5 +84,40 @@ describe("Blog app", function () {
         .find(".likes")  
         .should("contain", "1");  
     });
+
+    it('User who created the blog can delete it', function () {
+      // Crear un blog
+      cy.contains('Create new blog').should('be.visible').click();
+      cy.get('input[name="title"]').type('Cypress Testing');
+      cy.get('input[name="author"]').type('villa');
+      cy.get('input[name="url"]').type('https://cypress.io');
+      cy.get('button').contains('Create').click();
+      cy.contains('Cypress Testing villa');
+    
+      // Ver el blog y hacer clic en "View"
+      cy.contains('Cypress Testing villa')
+        .parent() // Encuentra el blog
+        .find('button')
+        .contains('View') // Encuentra el botón "View"
+        .click(); // Haz clic en "View"
+    
+      // Verifica que el botón "Delete" está presente y es visible
+      cy.contains('Cypress Testing villa')
+        .parent() // Encuentra el blog
+        .find('button')
+        .contains('Delete') // Encuentra el botón "Delete"
+        .should('be.visible') // Asegura que el botón de eliminar esté visible
+    
+      // Hacer clic en "Delete"
+      cy.contains('Cypress Testing villa')
+        .parent()
+        .find('button')
+        .contains('Delete')
+        .click(); // Clic en el botón "Delete"
+    
+      // Verifica que el blog haya sido eliminado
+      cy.contains('Cypress Testing villa').should('not.exist'); // Asegura que el blog ya no existe
+    });
+    
   });
 });
