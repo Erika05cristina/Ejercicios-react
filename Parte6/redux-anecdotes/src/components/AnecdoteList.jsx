@@ -1,20 +1,26 @@
-import { useSelector, useDispatch } from 'react-redux';
-import { voteAnecdote } from '../reducers/anecdoteReducer';
+import { useSelector, useDispatch } from "react-redux";
+import { voteAnecdote } from "../reducers/anecdoteReducer";
 
 const AnecdoteList = () => {
   const dispatch = useDispatch();
-  const anecdotes = useSelector(state =>
-    [...state].sort((a, b) => b.votes - a.votes) 
+  const anecdotes = useSelector((state) =>
+    [...state.anecdotes].sort((a, b) => b.votes - a.votes) 
   );
+
+  if (!Array.isArray(anecdotes)) {
+    return <div>Loading or Error: Anecdotes should be an array</div>;
+  }
 
   return (
     <div>
-      {anecdotes.map(anecdote => (
+      {anecdotes.map((anecdote) => (
         <div key={anecdote.id}>
           <div>{anecdote.content}</div>
           <div>
             has {anecdote.votes}
-            <button onClick={() => dispatch(voteAnecdote(anecdote.id))}>vote</button>
+            <button onClick={() => dispatch(voteAnecdote(anecdote.id))}>
+              vote
+            </button>
           </div>
         </div>
       ))}
