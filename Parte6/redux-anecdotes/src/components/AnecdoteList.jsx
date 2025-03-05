@@ -1,5 +1,6 @@
 import { useSelector, useDispatch } from "react-redux";
 import { voteAnecdote } from "../reducers/anecdoteReducer";
+import { setNotification, clearNotification } from '../reducers/notificationReducer'; 
 
 const AnecdoteList = () => {
   const dispatch = useDispatch();
@@ -7,9 +8,13 @@ const AnecdoteList = () => {
     [...state.anecdotes].sort((a, b) => b.votes - a.votes) 
   );
 
-  if (!Array.isArray(anecdotes)) {
-    return <div>Loading or Error: Anecdotes should be an array</div>;
-  }
+  const handleVote = (id, content) => {
+    dispatch(voteAnecdote(id));
+    dispatch(setNotification(`You voted  "${content}"`));
+    setTimeout(() => {
+      dispatch(clearNotification());
+    }, 5000);
+  };
 
   return (
     <div>
@@ -18,9 +23,7 @@ const AnecdoteList = () => {
           <div>{anecdote.content}</div>
           <div>
             has {anecdote.votes}
-            <button onClick={() => dispatch(voteAnecdote(anecdote.id))}>
-              vote
-            </button>
+            <button onClick={() => handleVote(anecdote.id, anecdote.content)}>vote</button>
           </div>
         </div>
       ))}
