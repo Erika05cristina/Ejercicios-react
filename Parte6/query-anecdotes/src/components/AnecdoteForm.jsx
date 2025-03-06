@@ -1,37 +1,38 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNotification } from "./NotificationContext";
 import anecdoteService from "../services/anecdotes";
 
 const AnecdoteForm = () => {
-  const [content, setContent] = useState("");
   const queryClient = useQueryClient();
+  const { dispatch } = useNotification();
 
-  const mutation = useMutation({
+  const newAnecdoteMutation = useMutation({
     mutationFn: anecdoteService.create,
-    onSuccess: () => {
+    onSuccess: (newAnecdote) => {
       queryClient.invalidateQueries(["anecdotes"]);
+      dispatch({ type: "SHOW", payload: `Anecdote '${newAnecdote.content}' added` });
+      setTimeout(() => dispatch({ type: "HIDE" }), 5000);
+    },
+    onError: (error) => {
+      dispatch({ type: "SHOW", payload: "Anecdote must be at least 5 characters long" });
+      setTimeout(() => dispatch({ type: "HIDE" }), 5000);
     },
   });
 
   const onCreate = (event) => {
     event.preventDefault();
-    if (content.length >= 5) {
-      mutation.mutate(content);
-      setContent("");
-    } else {
-      alert("Anecdote must be at least 5 characters long");
-    }
+    const content = event.target.anecdote.value;
+    event.target.anecdote.value = "";
+
+    newAnecdoteMutation.mutate({ content, votes: 0 });
   };
 
   return (
     <div>
       <h3>create new</h3>
       <form onSubmit={onCreate}>
-        <input
-          name="anecdote"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
+        <input name="anecdote" />
         <button type="submit">create</button>
       </form>
     </div>
