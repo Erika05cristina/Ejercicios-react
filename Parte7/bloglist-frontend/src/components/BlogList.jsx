@@ -1,7 +1,42 @@
-import React from "react";
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';  
+import { updateBlog, removeBlog } from '../reducers/blogReducer';
+import blogService from '../services/blogs';
 
 const BlogList = ({ blogs }) => {
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user); 
+  const token = user ? user.token : null;  
+
   const sortedBlogs = [...blogs].sort((a, b) => b.likes - a.likes);
+ 
+  const handleLike = (blog) => {
+    const updatedBlog = { ...blog, likes: blog.likes + 1 };
+    blogService.update(blog.id, updatedBlog)
+      .then((updated) => {
+        dispatch(updateBlog(updated));  
+      })
+      .catch((error) => {
+        console.error('Error al dar me gusta:', error);
+      });
+  };
+ 
+  const handleDelete = (id) => {
+    if (!token) {
+      console.error('Token is missing');
+      return;  
+    }
+
+    if (window.confirm('¿Estás seguro de que deseas eliminar este blog?')) {
+      blogService.remove(id, token)  
+        .then(() => {
+          dispatch(removeBlog({ id }));  
+        })
+        .catch((error) => {
+          console.error('Error al eliminar el blog:', error);
+        });
+    }
+  };
 
   return (
     <div>
@@ -10,7 +45,10 @@ const BlogList = ({ blogs }) => {
         <div key={blog.id}>
           <h3>{blog.title}</h3>
           <p>{blog.author}</p>
+          <p>{blog.url}</p>
           <p>{blog.likes} likes</p>
+          <button onClick={() => handleLike(blog)}>Like</button>
+          <button onClick={() => handleDelete(blog.id)}>Delete</button>
         </div>
       ))}
     </div>
