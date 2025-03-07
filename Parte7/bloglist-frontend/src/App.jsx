@@ -1,16 +1,24 @@
+import { useDispatch, useSelector } from "react-redux";
 import { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux"; // Usamos Redux
-import Blog from "./components/Blog";
+import { setBlogs, addBlog } from "./reducers/blogReducer";
+import {
+  setNotification,
+  clearNotification,
+} from "./reducers/notificationReducer";
+import { setUser, clearUser } from "./reducers/userReducer";  
 import blogService from "./services/blogs";
 import loginService from "./services/login";
 import BlogForm from "./components/BlogForm";
-import { setNotification, clearNotification } from "./reducers/notificationReducer"; // Acciones de notificación
+import BlogList from "./components/BlogList";
+import Notification from "./components/Notification";
+import LoginForm from "./components/LoginForm";
+
 const App = () => {
   const dispatch = useDispatch();
-  const notification = useSelector((state) => state.notification); // Usamos el estado de Redux para las notificaciones
+  const notification = useSelector((state) => state.notification);
+  const blogs = useSelector((state) => state.blogs);
+  const user = useSelector((state) => state.user); 
 
-  const [blogs, setBlogs] = useState([]);
-  const [user, setUser] = useState(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [formVisible, setFormVisible] = useState(false);
@@ -24,36 +32,45 @@ const App = () => {
   useEffect(() => {
     const loggedUserJSON = localStorage.getItem("loggedUser");
     if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON);
-      setUser(user);
-      blogService.setToken(user.token);
-      blogService.getAll().then((blogs) => setBlogs(blogs));
+      const loggedUser = JSON.parse(loggedUserJSON);
+      dispatch(setUser(loggedUser)); 
+      blogService.setToken(loggedUser.token);
+      blogService.getAll().then((blogs) => dispatch(setBlogs(blogs)));
     }
-  }, []);
+  }, [dispatch]);
 
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      const user = await loginService.login({ username, password });
-      setUser(user);
-      blogService.setToken(user.token);
-      localStorage.setItem("loggedUser", JSON.stringify(user));
+      const loggedInUser = await loginService.login({ username, password });
+      dispatch(setUser(loggedInUser)); 
+      blogService.setToken(loggedInUser.token);
+      localStorage.setItem("loggedUser", JSON.stringify(loggedInUser));
       setUsername("");
       setPassword("");
-      dispatch(setNotification({ message: "Login successful", type: "success" }));
+      dispatch(
+        setNotification({ message: "Login successful", type: "success" })
+      );
       setTimeout(() => dispatch(clearNotification()), 5000);
     } catch (error) {
       console.error("Error al iniciar sesión", error);
-      dispatch(setNotification({ message: "Invalid username or password", type: "error" }));
+      dispatch(
+        setNotification({
+          message: "Invalid username or password",
+          type: "error",
+        })
+      );
       setTimeout(() => dispatch(clearNotification()), 5000);
     }
   };
 
   const handleLogout = () => {
-    setUser(null);
+    dispatch(clearUser());  
     localStorage.removeItem("loggedUser");
     blogService.setToken(null);
-    dispatch(setNotification({ message: "Logged out successfully", type: "success" }));
+    dispatch(
+      setNotification({ message: "Logged out successfully", type: "success" })
+    );
     setTimeout(() => dispatch(clearNotification()), 5000);
   };
 
@@ -69,7 +86,7 @@ const App = () => {
     event.preventDefault();
     try {
       const createdBlog = await blogService.create(newBlog);
-      setBlogs(blogs.concat(createdBlog));
+      dispatch(addBlog(createdBlog));  
       setNewBlog({
         title: "",
         author: "",
@@ -77,39 +94,18 @@ const App = () => {
         likes: 0,
       });
       setFormVisible(false);
-      dispatch(setNotification({ message: "New blog created successfully", type: "success" }));
+      dispatch(
+        setNotification({
+          message: "New blog created successfully",
+          type: "success",
+        })
+      );
       setTimeout(() => dispatch(clearNotification()), 5000);
     } catch (error) {
       console.error("Error al crear un blog", error);
-      dispatch(setNotification({ message: "Error creating blog", type: "error" }));
-      setTimeout(() => dispatch(clearNotification()), 5000);
-    }
-  };
-
-  const updateBlog = async (id, updatedBlog) => {
-    const newBlog = await blogService.update(id, updatedBlog);
-    setBlogs(blogs.map((blog) => (blog.id === id ? newBlog : blog)));
-  };
-
-  const deleteBlog = async (id) => {
-    try {
-      const user = JSON.parse(window.localStorage.getItem("loggedUser"));
-      if (!user || !user.token) {
-        throw new Error("Token not found");
-      }
-      const blogToDelete = blogs.find((blog) => blog.id === id);
-      if (blogToDelete.author !== user.username) {
-        dispatch(setNotification({ message: "You are not authorized to delete this blog", type: "error" }));
-        setTimeout(() => dispatch(clearNotification()), 5000);
-        return;
-      }
-      await blogService.remove(id, user.token);
-      setBlogs(blogs.filter((blog) => blog.id !== id));
-      dispatch(setNotification({ message: "Blog deleted successfully", type: "success" }));
-      setTimeout(() => dispatch(clearNotification()), 5000);
-    } catch (error) {
-      console.error("Error eliminando blog:", error);
-      dispatch(setNotification({ message: "Error deleting blog", type: "error" }));
+      dispatch(
+        setNotification({ message: "Error creating blog", type: "error" })
+      );
       setTimeout(() => dispatch(clearNotification()), 5000);
     }
   };
@@ -117,46 +113,40 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
-      <p>{user ? `${user.name} logged in` : 'No user logged in'}</p>
-      <button onClick={handleLogout}>Logout</button>
+     
+      <Notification notification={notification} />
 
-      {notification.message && (
-        <div
-          style={{
-            padding: "10px",
-            backgroundColor: notification.type === "success" ? "green" : "red",
-            color: "white",
-            marginBottom: "20px",
-            borderRadius: "5px",
-            textAlign: "center",
-          }}
-        >
-          {notification.message}
-        </div>
-      )}
-
-      {!formVisible ? (
-        <button onClick={() => setFormVisible(true)}>Create new blog</button>
-      ) : (
-        <BlogForm
-          handleNewBlogSubmit={handleNewBlogSubmit}
-          newBlog={newBlog}
-          handleNewBlogChange={handleNewBlogChange}
-          setFormVisible={setFormVisible}
+      {user === null ? (
+        <LoginForm
+          username={username}
+          password={password}
+          handleLogin={handleLogin}
+          setUsername={setUsername}
+          setPassword={setPassword}
         />
-      )}
+      ) : (
+        <>
+        <div>
+         <p>{user ? `${user.name} logged in` : "No user logged in"}</p>
+         <button onClick={handleLogout}>Logout</button>
+        </div>
 
-      {blogs
-        .sort((a, b) => b.likes - a.likes)
-        .map((blog) => (
-          <Blog
-            key={blog.id}
-            blog={blog}
-            updateBlog={updateBlog}
-            deleteBlog={deleteBlog}
-            user={user ? user : { id: null }}
-          />
-        ))}
+          {!formVisible ? (
+            <button onClick={() => setFormVisible(true)}>
+              Create new blog
+            </button>
+          ) : (
+            <BlogForm
+              handleNewBlogSubmit={handleNewBlogSubmit}
+              newBlog={newBlog}
+              handleNewBlogChange={handleNewBlogChange}
+              setFormVisible={setFormVisible}
+            />
+          )}
+
+          <BlogList blogs={blogs} />
+        </>
+      )}
     </div>
   );
 };

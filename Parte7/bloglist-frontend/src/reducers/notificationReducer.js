@@ -4,7 +4,7 @@ const notificationSlice = createSlice({
   name: 'notification',
   initialState: {
     message: '',
-    type: '', // 'success' o 'error'
+    type: '',  
   },
   reducers: {
     setNotification(state, action) {
