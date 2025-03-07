@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link, useParams, useNavigate } from 'react-router-dom'
+import { useField } from './hooks/index'
 
 const Menu = () => {
   const padding = { paddingRight: 5 }
@@ -59,35 +60,45 @@ const Footer = () => (
 )
 
 const CreateNew = ({ addNew }) => {
-  const [content, setContent] = useState('')
-  const [author, setAuthor] = useState('')
-  const [info, setInfo] = useState('')
+  const content = useField('text')   
+  const author = useField('text')    
+  const info = useField('text')   
   const navigate = useNavigate()
 
   const handleSubmit = (e) => {
     e.preventDefault()
     addNew({
-      content,
-      author,
-      info,
+      content: content.value,   
+      author: author.value,   
+      info: info.value,    
       votes: 0,
       id: Math.round(Math.random() * 10000)
     })
-    navigate('/') 
+    navigate('/')  
   }
 
   return (
     <div>
       <h2>Create a new anecdote</h2>
       <form onSubmit={handleSubmit}>
-        <div>content <input value={content} onChange={(e) => setContent(e.target.value)} /></div>
-        <div>author <input value={author} onChange={(e) => setAuthor(e.target.value)} /></div>
-        <div>info <input value={info} onChange={(e) => setInfo(e.target.value)} /></div>
+        <div>
+          content 
+          <input {...content} />  
+        </div>
+        <div>
+          author 
+          <input {...author} />  
+        </div>
+        <div>
+          info 
+          <input {...info} />     
+        </div>
         <button>create</button>
       </form>
     </div>
   )
 }
+
 
 const App = () => {
   const [anecdotes, setAnecdotes] = useState([
