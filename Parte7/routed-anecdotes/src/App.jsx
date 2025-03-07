@@ -60,40 +60,38 @@ const Footer = () => (
 )
 
 const CreateNew = ({ addNew }) => {
-  const content = useField('text')   
-  const author = useField('text')    
-  const info = useField('text')   
+  const content = useField('text')
+  const author = useField('text')
+  const info = useField('text')
   const navigate = useNavigate()
 
   const handleSubmit = (e) => {
     e.preventDefault()
     addNew({
-      content: content.value,   
-      author: author.value,   
-      info: info.value,    
+      content: content.value,
+      author: author.value,
+      info: info.value,
       votes: 0,
       id: Math.round(Math.random() * 10000)
     })
-    navigate('/')  
+    navigate('/')
+  }
+
+  const handleReset = () => {
+    content.reset()
+    author.reset()
+    info.reset()
   }
 
   return (
     <div>
       <h2>Create a new anecdote</h2>
       <form onSubmit={handleSubmit}>
-        <div>
-          content 
-          <input {...content} />  
-        </div>
-        <div>
-          author 
-          <input {...author} />  
-        </div>
-        <div>
-          info 
-          <input {...info} />     
-        </div>
-        <button>create</button>
+        <div>content <input value={content.value} onChange={content.onChange} type={content.type} /></div>
+        <div>author <input value={author.value} onChange={author.onChange} type={author.type} /></div>
+        <div>info <input value={info.value} onChange={info.onChange} type={info.type} /></div>
+        <button type="submit">create</button>
+        <button type="button" onClick={handleReset}>reset</button>
       </form>
     </div>
   )
