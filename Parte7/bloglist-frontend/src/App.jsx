@@ -12,12 +12,13 @@ import BlogForm from "./components/BlogForm";
 import BlogList from "./components/BlogList";
 import Notification from "./components/Notification";
 import LoginForm from "./components/LoginForm";
+import UserList from "./components/UserList";
 
 const App = () => {
   const dispatch = useDispatch();
   const notification = useSelector((state) => state.notification);
   const blogs = useSelector((state) => state.blogs);
-  const user = useSelector((state) => state.user); 
+  const user = useSelector((state) => state.user);  
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -29,13 +30,11 @@ const App = () => {
     likes: 0,
   });
 
-  useEffect(() => {
+  useEffect(() => { 
     const loggedUserJSON = localStorage.getItem("loggedUser");
     if (loggedUserJSON) {
       const loggedUser = JSON.parse(loggedUserJSON);
-      dispatch(setUser(loggedUser)); 
-      blogService.setToken(loggedUser.token);
-      blogService.getAll().then((blogs) => dispatch(setBlogs(blogs)));
+      dispatch(setUser(loggedUser));  
     }
   }, [dispatch]);
 
@@ -43,7 +42,7 @@ const App = () => {
     event.preventDefault();
     try {
       const loggedInUser = await loginService.login({ username, password });
-      dispatch(setUser(loggedInUser)); 
+      dispatch(setUser(loggedInUser));  
       blogService.setToken(loggedInUser.token);
       localStorage.setItem("loggedUser", JSON.stringify(loggedInUser));
       setUsername("");
@@ -65,7 +64,7 @@ const App = () => {
   };
 
   const handleLogout = () => {
-    dispatch(clearUser());  
+    dispatch(clearUser()); 
     localStorage.removeItem("loggedUser");
     blogService.setToken(null);
     dispatch(
@@ -113,7 +112,7 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
-     
+
       <Notification notification={notification} />
 
       {user === null ? (
@@ -126,12 +125,10 @@ const App = () => {
         />
       ) : (
         <>
-        <div>
-         <p>{user ? `${user.name} logged in` : "No user logged in"}</p>
-         <button onClick={handleLogout}>Logout</button>
-        </div>
+          <p>{user ? `${user.name} logged in` : "No user logged in"}</p>
+          <button onClick={handleLogout}>Logout</button>
 
-          {!formVisible ? (
+          {/* {!formVisible ? (
             <button onClick={() => setFormVisible(true)}>
               Create new blog
             </button>
@@ -144,7 +141,8 @@ const App = () => {
             />
           )}
 
-          <BlogList blogs={blogs} />
+          <BlogList blogs={blogs} /> */}
+          <UserList />
         </>
       )}
     </div>
