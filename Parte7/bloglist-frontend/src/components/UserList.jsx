@@ -1,41 +1,22 @@
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { initializeUsers } from "../reducers/usersReducer";
-import { Link } from "react-router-dom";
+import React from "react";
 
-const UserList = () => {
-  const dispatch = useDispatch();
-  const users = useSelector((state) => state.users);
+const UserList = ({ usuarios }) => {
+  console.log("Usuarios recibidos en UserList:", usuarios); 
 
-  useEffect(() => {
-    dispatch(initializeUsers()); 
-  }, [dispatch]);
-
-  if (!users || users.length === 0) {
-    return <p>No users found</p>;
+  if (!usuarios || usuarios.length === 0) {
+    return <p>No hay usuarios disponibles.</p>;
   }
 
   return (
     <div>
-      <h2>Users</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Username</th>
-            <th>Blogs Created</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user.id}>
-              <td>
-                <Link to={`/users/${user.id}`}>{user.username}</Link>
-              </td>
-              <td>{user.blogs ? user.blogs.length : 0}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <h2>Lista de Usuarios</h2>
+      <ul>
+        {usuarios.map((usuario) => (
+          <li key={usuario.id}>
+            {usuario.name} ({usuario.username})
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

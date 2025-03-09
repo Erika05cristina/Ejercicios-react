@@ -1,49 +1,59 @@
-import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';  
-import { updateBlog, removeBlog } from '../reducers/blogReducer';
-import blogService from '../services/blogs';
+import { useDispatch, useSelector } from "react-redux";
+import { updateBlog, removeBlog } from "../reducers/blogReducer";
+import blogService from "../services/blogs";
+import { Link } from "react-router-dom";  
 
-const BlogList = ({ blogs }) => {
+const BlogList = () => {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user); 
-  const token = user ? user.token : null;  
-
-  const sortedBlogs = [...blogs].sort((a, b) => b.likes - a.likes);
+  const user = useSelector((state) => state.user);
+  const blogs = useSelector((state) => state.blogs); 
+  const token = user ? user.token : null;
  
+  const sortedBlogs = (blogs && Array.isArray(blogs) ? [...blogs] : []).sort((a, b) => b.likes - a.likes);
+
   const handleLike = (blog) => {
     const updatedBlog = { ...blog, likes: blog.likes + 1 };
-    blogService.update(blog.id, updatedBlog)
+    blogService
+      .update(blog.id, updatedBlog)
       .then((updated) => {
-        dispatch(updateBlog(updated));  
+        dispatch(updateBlog(updated));
       })
       .catch((error) => {
-        console.error('Error al dar me gusta:', error);
+        console.error("Error al dar me gusta:", error);
       });
   };
- 
+
   const handleDelete = (id) => {
     if (!token) {
-      console.error('Token is missing');
-      return;  
+      console.error("Token is missing");
+      return;
     }
 
-    if (window.confirm('¿Estás seguro de que deseas eliminar este blog?')) {
-      blogService.remove(id, token)  
+    if (window.confirm("¿Estás seguro de que deseas eliminar este blog?")) {
+      blogService
+        .remove(id, token)
         .then(() => {
-          dispatch(removeBlog({ id }));  
+          dispatch(removeBlog({ id }));
         })
         .catch((error) => {
-          console.error('Error al eliminar el blog:', error);
+          console.error("Error al eliminar el blog:", error);
         });
     }
   };
+ 
+  if (sortedBlogs.length === 0) {
+    return <p>No hay blogs disponibles.</p>;
+  }
 
   return (
     <div>
       <h2>Blog List</h2>
       {sortedBlogs.map((blog) => (
         <div key={blog.id}>
-          <h3>{blog.title}</h3>
+          <h3>
+            <Link to={`/blogs/${blog.id}`}>{blog.title}</Link>
+          </h3>
+
           <p>{blog.author}</p>
           <p>{blog.url}</p>
           <p>{blog.likes} likes</p>

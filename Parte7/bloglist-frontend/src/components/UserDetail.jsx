@@ -1,19 +1,26 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const UserDetail = () => {
   const { id } = useParams();
-  const user = useSelector((state) => state.users.find((u) => u.id === id));
+  const users = useSelector((state) => state.users);
+  const blogs = useSelector((state) => state.blogs);
 
-  if (!user) return <p>Loading...</p>;
+  const user = users.find((user) => user.id === id);
+  if (!user) {
+    return <p>User not found</p>;
+  }
+
+  const userBlogs = blogs.filter(
+    (blog) => blog.user && blog.user.id === id
+  );
 
   return (
     <div>
       <h2>{user.name}</h2>
-      <h3>Added Blogs</h3>
+      <h3>Added blogs</h3>
       <ul>
-        {user.blogs.map((blog) => (
+        {userBlogs.map((blog) => (
           <li key={blog.id}>{blog.title}</li>
         ))}
       </ul>
