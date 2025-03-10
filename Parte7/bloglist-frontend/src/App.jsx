@@ -1,10 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import { setBlogs, addBlog } from "./reducers/blogReducer";
-import {
-  setNotification,
-  clearNotification,
-} from "./reducers/notificationReducer";
+import { setNotification, clearNotification,} from "./reducers/notificationReducer";
 import { setUser, clearUser } from "./reducers/userReducer";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
@@ -18,6 +15,8 @@ import BlogDetail from "./components/BlogDetail";
 import Menu from "./components/Menu";
 import { Route, Routes } from "react-router-dom";
 import userService from "./services/users";
+import { Container, Button, Typography } from "@mui/material";
+
 
 const App = () => {
   const dispatch = useDispatch();
@@ -146,8 +145,10 @@ const App = () => {
   };
 
   return (
-    <div>
-      <h2>blogs</h2>
+    <Container>
+      <Typography variant="h2" gutterBottom>
+        Blogs
+      </Typography>
       <Notification notification={notification} />
       {user === null ? (
         <LoginForm
@@ -159,14 +160,18 @@ const App = () => {
         />
       ) : (
         <>
-          <p>{user ? `${user.name} logged in` : "No user logged in"}</p>
-          <button onClick={handleLogout}>Logout</button>
+          <Typography variant="h5" gutterBottom>
+            {user ? `${user.name} logged in        ` : "No user logged in"}
+          <Button variant="contained" color="secondary" onClick={handleLogout}>
+            Logout
+          </Button>
+          </Typography>
+       
           
-           
           {!formVisible ? (
-            <button onClick={() => setFormVisible(true)}>
+          <Container>  <Button variant="contained" color="primary" onClick={() => setFormVisible(true)} style={{ marginTop: 16 }}>
               Create new blog
-            </button>
+            </Button></Container>
           ) : (
             <BlogForm
               handleNewBlogSubmit={handleNewBlogSubmit}
@@ -175,17 +180,16 @@ const App = () => {
               setFormVisible={setFormVisible}
             />
           )}
-          
           <Menu />
           <Routes>
             <Route path="/" element={<BlogList />} />
-            <Route path="/users" element={<UserList  usuarios={usuarios} />} />
+            <Route path="/users" element={<UserList usuarios={usuarios} />} />
             <Route path="/users/:id" element={<UserDetail />} />
             <Route path="/blogs/:id" element={<BlogDetail />} />
           </Routes>
         </>
       )}
-    </div>
+    </Container>
   );
 };
 

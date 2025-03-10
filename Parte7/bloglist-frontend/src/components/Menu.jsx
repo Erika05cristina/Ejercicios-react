@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { Container, Button, Typography } from "@mui/material";
 
 const Menu = () => {
   const linkStyle = {
@@ -7,14 +8,23 @@ const Menu = () => {
   };
 
   return (
-    <nav>
-      <NavLink style={linkStyle} to="/" end>
-        Blogs
-      </NavLink>
-      <NavLink style={linkStyle} to="/users">
-        Users
-      </NavLink>
-    </nav>
+    <Container>
+      <nav>
+        <Typography variant="h6" gutterBottom>
+           
+        </Typography>
+        <NavLink style={linkStyle} to="/" end>
+          <Button variant="contained" color="primary" sx={{ marginRight: 2 }}>
+            Blogs
+          </Button>
+        </NavLink>
+        <NavLink style={linkStyle} to="/users">
+          <Button variant="contained" color="primary">
+            Users
+          </Button>
+        </NavLink>
+      </nav>
+    </Container>
   );
 };
 

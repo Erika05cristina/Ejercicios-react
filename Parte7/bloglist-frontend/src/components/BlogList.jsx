@@ -2,6 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateBlog, removeBlog } from "../reducers/blogReducer";
 import blogService from "../services/blogs";
 import { Link } from "react-router-dom";  
+import { Card, CardContent, CardActions, Button, Typography } from "@mui/material";
 
 const BlogList = () => {
   const dispatch = useDispatch();
@@ -49,20 +50,32 @@ const BlogList = () => {
     <div>
       <h2>Blog List</h2>
       {sortedBlogs.map((blog) => (
-        <div key={blog.id}>
-          <h3>
-            <Link to={`/blogs/${blog.id}`}>{blog.title}</Link>
-          </h3>
-
-          <p>{blog.author}</p>
-          <p>{blog.url}</p>
-          <p>{blog.likes} likes</p>
-          <button onClick={() => handleLike(blog)}>Like</button>
-          <button onClick={() => handleDelete(blog.id)}>Delete</button>
-        </div>
+        <Card key={blog.id} sx={{ marginBottom: 2 }}>
+          <CardContent>
+            <Typography variant="h5" component="div">
+              <Link to={`/blogs/${blog.id}`}>{blog.title}</Link>
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {blog.author}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {blog.url}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {blog.likes} likes
+            </Typography>
+          </CardContent>
+          <CardActions>
+            <Button size="small" onClick={() => handleLike(blog)}>
+              Like
+            </Button>
+            <Button size="small" color="error" onClick={() => handleDelete(blog.id)}>
+              Delete
+            </Button>
+          </CardActions>
+        </Card>
       ))}
     </div>
   );
 };
-
 export default BlogList;

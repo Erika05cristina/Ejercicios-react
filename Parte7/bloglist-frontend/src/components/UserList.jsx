@@ -1,4 +1,5 @@
 import React from "react";
+import { Card, CardContent, Typography } from "@mui/material";
 
 const UserList = ({ usuarios }) => {
   console.log("Usuarios recibidos en UserList:", usuarios); 
@@ -10,13 +11,19 @@ const UserList = ({ usuarios }) => {
   return (
     <div>
       <h2>Lista de Usuarios</h2>
-      <ul>
-        {usuarios.map((usuario) => (
-          <li key={usuario.id}>
-            {usuario.name} ({usuario.username})
-          </li>
-        ))}
-      </ul>
+      {usuarios.map((usuario) => (
+        <Card key={usuario.id} sx={{ marginBottom: 3 }}>
+          <CardContent>
+            <Typography variant="h5" component="div">
+              {usuario.name}
+            </Typography>
+            
+            <Typography variant="body2" color="text.secondary">
+              {usuario.blogs.length} blogs
+            </Typography>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { Container, Typography, Button, Link } from "@mui/material";
 
 const BlogDetail = () => {
   const { id } = useParams();
@@ -7,22 +8,25 @@ const BlogDetail = () => {
   const blog = blogs.find((blog) => blog.id === id);
 
   if (!blog) {
-    return <p>Blog not found</p>;
+    return <Typography variant="h6" color="error">Blog not found</Typography>;
   }
 
   return (
-    <div>
-      <h2>
+    <Container maxWidth="sm" sx={{ mt: 5}}>
+      <Typography variant="h4" gutterBottom>
         {blog.title} by {blog.author}
-      </h2>
-      <p>
-        URL:{" "}
-        <a href={blog.url} target="_blank" rel="noopener noreferrer">
+      </Typography>
+      <Typography variant="body1" >
+        <strong>URL:</strong>{" "}
+        <Link href={blog.url} target="_blank" rel="noopener noreferrer">
           {blog.url}
-        </a>
-      </p>
-      <p>Likes: {blog.likes}</p>
-    </div>
+        </Link>
+      </Typography>
+      <Typography variant="body1"  >
+        <strong>Likes:</strong> {blog.likes}
+      </Typography>
+     
+    </Container>
   );
 };
 
