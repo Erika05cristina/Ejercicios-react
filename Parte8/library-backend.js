@@ -110,6 +110,10 @@ type Author {
     genres: [String!]!
   }
 
+  type Mutation {
+    addBook(title: String!, author: String!, published: Int!, genres: [String!]!): Book!
+  }
+
   type Query {
     allBooks(author: String, genre: String): [Book!]!
     bookCount: Int!
@@ -130,13 +134,34 @@ const resolvers = {
     allAuthors: () => {
       return authors.map((author) => {
         const bookCount = books.filter((book) => book.author === author.name).length;
-        return {
-          ...author,
-          bookCount,
-        };
+        return { ...author, bookCount };
       });
-    },
+    }
   },
+
+  Mutation: {
+    addBook: (_, { title, author, published, genres }) => { 
+      let existingAuthor = authors.find((a) => a.name === author);
+ 
+      if (!existingAuthor) {
+        existingAuthor = { name: author, bookCount: 0 };
+        authors.push(existingAuthor);
+      }
+ 
+      const newBook = {
+        title,
+        published,
+        author,
+        genres,
+        id: `afa5de0${books.length + 1}-344d-11e9-a414-719c6709cf3e`
+      }; 
+      books.push(newBook);
+ 
+      existingAuthor.bookCount++;
+
+      return newBook;
+    }
+  }
 };
 
 
