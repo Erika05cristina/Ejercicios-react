@@ -112,6 +112,7 @@ type Author {
 
   type Mutation {
     addBook(title: String!, author: String!, published: Int!, genres: [String!]!): Book!
+    editAuthor(name: String!, setBornTo: Int!): Author
   }
 
   type Query {
@@ -160,10 +161,20 @@ const resolvers = {
       existingAuthor.bookCount++;
 
       return newBook;
+    },
+
+    editAuthor: (_, { name, setBornTo }) => {
+      const author = authors.find((author) => author.name === name);
+      if (author) {
+        author.born = setBornTo;
+        return author;
+      } else {
+        return null;
+      }
     }
   }
 };
-
+   
 
 const server = new ApolloServer({
   typeDefs,
