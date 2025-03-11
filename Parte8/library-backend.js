@@ -98,20 +98,35 @@ let books = [
 */
 
 const typeDefs = `
-  type Author {
+type Author {
     name: String!
     born: Int
     bookCount: Int!
   }
+  type Book {
+    title: String!
+    published: Int!
+    author: String!
+    genres: [String!]!
+  }
 
   type Query {
-    allAuthors: [Author!]!
+    allBooks(author: String, genre: String): [Book!]!
     bookCount: Int!
+    allAuthors: [Author!]!
   }
 `;
 
 const resolvers = {
   Query: {
+    allBooks: (_, { author, genre }) => {
+      return books.filter((book) => {
+        const authorMatch = author ? book.author === author : true;
+        const genreMatch = genre ? book.genres.includes(genre) : true;
+        return authorMatch && genreMatch;
+      });
+    },
+    bookCount: () => books.length,
     allAuthors: () => {
       return authors.map((author) => {
         const bookCount = books.filter((book) => book.author === author.name).length;
@@ -121,9 +136,10 @@ const resolvers = {
         };
       });
     },
-    bookCount: () => books.length,
   },
 };
+
+
 const server = new ApolloServer({
   typeDefs,
   resolvers,
