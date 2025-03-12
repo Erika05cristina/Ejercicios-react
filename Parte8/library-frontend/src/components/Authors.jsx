@@ -1,15 +1,18 @@
-import { useQuery } from "@apollo/client";
-import { ALL_AUTHORS } from "../queries";
+import { useQuery } from '@apollo/client';
+import { ALL_AUTHORS } from '../queries';
+import SetBirthYear from './SetBirthYear';
 
 const Authors = (props) => {
+  const { loading, error, data } = useQuery(ALL_AUTHORS);
+
   if (!props.show) {
     return null;
   }
 
-  const { loading, error, data } = useQuery(ALL_AUTHORS);
+  if (loading) return <p>Loading authors...</p>;
+  if (error) return <p>Error fetching authors</p>;
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error loading authors</p>;
+  const authors = data.allAuthors;
 
   return (
     <div>
@@ -23,15 +26,16 @@ const Authors = (props) => {
           </tr>
         </thead>
         <tbody>
-          {data.allAuthors.map((a) => (
+          {authors.map((a) => (
             <tr key={a.name}>
               <td>{a.name}</td>
-              <td>{a.born || "Unknown"}</td>
+              <td>{a.born || 'N/A'}</td>
               <td>{a.bookCount}</td>
             </tr>
           ))}
         </tbody>
       </table>
+      <SetBirthYear authors={authors} />
     </div>
   );
 };
