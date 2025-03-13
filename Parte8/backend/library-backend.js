@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { ApolloServer, gql } = require("apollo-server");
+const { ApolloServer, gql, UserInputError } = require("apollo-server");
 const Author = require("./models/author");
 const Book = require("./models/book");
 require("./utils/db");
@@ -14,7 +14,7 @@ const resolvers = {
         else return [];
       }
       if (genre) {
-        query.genres = { $in: [genre] }; 
+        query.genres = { $in: [genre] };
       }
       return Book.find(query).populate("author");
     },
@@ -34,30 +34,56 @@ const resolvers = {
 
   Mutation: {
     addBook: async (_, { title, author, published, genres }) => {
-      let authorDoc = await Author.findOne({ name: author });
+      try {
+        let authorDoc = await Author.findOne({ name: author });
 
-      if (!authorDoc) {
-        authorDoc = new Author({ name: author });
-        await authorDoc.save();
+        if (!authorDoc) {
+          authorDoc = new Author({ name: author });
+          await authorDoc.save();
+        }
+
+        const newBook = new Book({
+          title,
+          published,
+          genres,
+          author: authorDoc._id,
+        });
+
+        await newBook.save();
+        return Book.findById(newBook._id).populate("author");
+      } catch (error) {
+        if (error instanceof mongoose.Error.ValidationError) {
+          throw new UserInputError("Error de validación", {
+            invalidArgs: Object.keys(error.errors),
+            message: error.message,
+          });
+        }
+        throw new Error("Error al agregar el libro");
       }
-
-      const newBook = new Book({
-        title,
-        published,
-        genres,
-        author: authorDoc._id,
-      });
-
-      await newBook.save();
-      return Book.findById(newBook._id).populate("author");  
     },
 
     editAuthor: async (_, { name, setBornTo }) => {
-      return Author.findOneAndUpdate(
-        { name },
-        { born: setBornTo },
-        { new: true }
-      );
+      try {
+        const author = await Author.findOneAndUpdate(
+          { name },
+          { born: setBornTo },
+          { new: true }
+        );
+
+        if (!author) {
+          throw new Error("El autor no se encuentra.");
+        }
+
+        return author;
+      } catch (error) {
+        if (error instanceof mongoose.Error.ValidationError) {
+          throw new UserInputError("Error de validación", {
+            invalidArgs: Object.keys(error.errors),
+            message: error.message,
+          });
+        }
+        throw new Error("Error al editar el autor");
+      }
     },
   },
 };
