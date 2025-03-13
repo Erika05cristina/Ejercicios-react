@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const { ApolloServer, gql } = require("apollo-server");
 const Author = require("./models/author");
 const Book = require("./models/book");
-require("./utils/db"); 
+require("./utils/db");
 
 const resolvers = {
   Query: {
@@ -14,7 +14,7 @@ const resolvers = {
         else return [];
       }
       if (genre) {
-        query.genres = genre;
+        query.genres = { $in: [genre] }; 
       }
       return Book.find(query).populate("author");
     },
@@ -22,12 +22,12 @@ const resolvers = {
     bookCount: async () => Book.countDocuments(),
 
     allAuthors: async () => {
-      const authors = await Author.find({});
+      const authors = await Author.find().lean();
       return Promise.all(
-        authors.map(async (author) => {
-          const bookCount = await Book.countDocuments({ author: author._id });
-          return { ...author.toObject(), bookCount };
-        })
+        authors.map(async (author) => ({
+          ...author,
+          bookCount: await Book.countDocuments({ author: author._id }),
+        }))
       );
     },
   },
@@ -49,7 +49,7 @@ const resolvers = {
       });
 
       await newBook.save();
-      return newBook.populate("author");
+      return Book.findById(newBook._id).populate("author");  
     },
 
     editAuthor: async (_, { name, setBornTo }) => {
